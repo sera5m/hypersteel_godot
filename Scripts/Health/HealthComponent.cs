@@ -1,10 +1,12 @@
 using Godot;
+using Hypersteel.Damage;
 
 namespace Hypersteel.Health;
 
 public partial class HealthComponent : Node
 {
 	[Export] public HealthRuleConfs rules;
+	[Export] public ArmorSheet armor;
 	[Export] public NodePath skeletonPath;
 
 	public HealthState State { get; private set; }
@@ -32,6 +34,31 @@ public partial class HealthComponent : Node
 			EmitSignal(SignalName.Damaged, result.IntoHp + result.IntoShield, (int)hit.Segment);
 		if (State.Dead)
 			EmitSignal(SignalName.Died);
+	}
+
+	public void Hurt(DamagePacket packet)
+	{
+		float kinetic = packet.Kinetic;
+		int armorLvl = 1;
+		if (armor != null && armor.plates != null)
+		{
+			foreach (ArmorPlate plate in armor.plates)
+			{
+				if (plate == null) continue;
+				if (plate.segment == packet.Segment || plate.inherent)
+					armorLvl = Math.Max(armorLvl, plate.armorLevel);
+			}
+		}
+
+		ApOutcome outcome = ArmorLadder.Outcome(packet.Ap, armorLvl, packet.KineticFlags);
+		if (outcome == ApOutcome.Null && (packet.KineticFlags & KineticFlags.Incendiary) != 0 && armorLvl > packet.Ap)
+		{
+			// stick: still apply some heat via legacy thermal if present
+		}
+		float mul = ArmorLadder.KineticMul(outcome, packet.Ap, armorLvl);
+		if (armor != null) mul *= armor.resistKinetic;
+		packet.Kinetic = kinetic * mul;
+		Hurt(packet.ToLegacyHit());
 	}
 
 	static Skeleton3D FindSkeleton(Node from)
