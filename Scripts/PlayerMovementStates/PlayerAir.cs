@@ -4,7 +4,7 @@ using System;
 [GlobalClass, Icon("res://addons/finite_state_machine/state_icon.png")]
 public partial class PlayerAir : PlayerMovementState
 {
-    public static event Action<Vector3> LastVelocityChangeLanded; // Event that keeps track of the last velocity when landed
+    public static event Action<Vector3> LastVelocityChangeLanded;
     public static event Action PlayerLanded;
 
     private Vector3 _initialDirection;
@@ -13,14 +13,12 @@ public partial class PlayerAir : PlayerMovementState
     {
         base.Enter();
 
-        if (Movement.IsOnFloor() && Movement.FSM.PreviousState is PlayerWallrun)
+        if (Movement.OnGround && Movement.FSM.PreviousState is PlayerWallrun)
         {
             Movement.airTime = 0f;
-            Movement.wallRunTimer = 0f; // Reset the timer
-            
+            Movement.wallRunTimer = 0f;
             EmitSignal(SignalName.StateFinished, "PlayerIdle", new());
         }
-
     }
 
     public override void Exit()
@@ -34,25 +32,14 @@ public partial class PlayerAir : PlayerMovementState
         Movement.Stand(delta);
         Movement.airTime += (float)delta;
 
-        // Handle current speed when in air based on given speed and momentum
-
-        if (Movement.momentum > 0.1f)
+        if (Movement.OnGround)
         {
-            Movement.currentSpeed = Mathf.Lerp(Movement.currentSpeed, Movement.sprintingSpeed + (Movement.momentum), 
-                            1.0f - Mathf.Pow(0.5f, (float)delta * Movement.lerpSpeed));
+            Movement.airTime = 0f;
+            Movement.wallRunTimer = 0f;
+            EmitSignal(SignalName.StateFinished, "PlayerIdle", new());
         }
 
-        // Handle landing
-		if (Movement.IsOnFloor())
-		{
-			Movement.airTime = 0f;
-            Movement.wallRunTimer = 0f; // Reset the timer
-
-            EmitSignal(SignalName.StateFinished, "PlayerIdle", new());
-		}
-
-        // Wallrun
-        if (Movement.CheckWall(out KinematicCollision3D collision, out String direction) 
+        if (Movement.CheckWall(out KinematicCollision3D collision, out String direction)
         && Movement.wallRunTimer <= Movement.wallRunTime
         && Movement.airTime < 2f
         && !Movement.SendRayInDirection(-Movement.GlobalBasis.Z, 0.5f, out Vector3 normal, out Vector3 point)
@@ -62,9 +49,8 @@ public partial class PlayerAir : PlayerMovementState
             EmitSignal(SignalName.StateFinished, "PlayerWallrun", new());
         }
 
-        // Vertical wallrun
         if (Movement.CheckVerticalWall(out Vector3 verticalWallDir, out Vector3 verticalWallPoint)
-            && !Movement.IsOnFloor()
+            && !Movement.OnGround
             && Movement.FSM.PreviousState is not PlayerWallrun
             && Movement.FSM.PreviousState is not PlayerVerticalWallrun && !Movement.isLadder)
         {
@@ -73,13 +59,9 @@ public partial class PlayerAir : PlayerMovementState
         }
 
         if (Movement.CheckVault(delta, out Vector3 vaultPoint))
-        {
             EmitSignal(SignalName.StateFinished, "PlayerVault", new());
-        }
 
         if (Movement.CheckLadder())
-        {
             EmitSignal(SignalName.StateFinished, "PlayerLadder", new());
-        }
     }
 }
