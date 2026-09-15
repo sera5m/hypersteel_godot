@@ -11,6 +11,8 @@ public partial class ActorEntity : CharacterBody3D, IDamageable
 	[Export] public StatusComponent status;
 	[Export] public FeelingsComponent feelings;
 	[Export] public StringName entityId = "actor";
+	[Export] public float Mass = 80f;
+	[Export] public bool collisionDamage = true;
 
 	[Export] bool wantCoverLog;
 	public bool WantCoverLog
@@ -29,6 +31,11 @@ public partial class ActorEntity : CharacterBody3D, IDamageable
 		health ??= FindChild("Health", true, false) as HealthComponent;
 		status ??= GetNodeOrNull<StatusComponent>("Status");
 		feelings ??= GetNodeOrNull<FeelingsComponent>("Feelings");
+		if (collisionDamage && GetNodeOrNull<CollisionDamage>("CollisionDamage") == null)
+		{
+			var cd = new CollisionDamage { Name = "CollisionDamage", Mass = Mass };
+			AddChild(cd);
+		}
 		if (health != null)
 			health.Damaged += OnHealthDamaged;
 	}
