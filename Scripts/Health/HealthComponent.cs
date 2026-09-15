@@ -38,6 +38,12 @@ public partial class HealthComponent : Node
 
 	public void Hurt(DamagePacket packet)
 	{
+		if (packet.FromCover)
+		{
+			Hurt(packet.ToLegacyHit());
+			return;
+		}
+
 		float kinetic = packet.Kinetic;
 		int armorLvl = 1;
 		if (armor != null && armor.plates != null)
@@ -51,10 +57,6 @@ public partial class HealthComponent : Node
 		}
 
 		ApOutcome outcome = ArmorLadder.Outcome(packet.Ap, armorLvl, packet.KineticFlags);
-		if (outcome == ApOutcome.Null && (packet.KineticFlags & KineticFlags.Incendiary) != 0 && armorLvl > packet.Ap)
-		{
-			// stick: still apply some heat via legacy thermal if present
-		}
 		float mul = ArmorLadder.KineticMul(outcome, packet.Ap, armorLvl);
 		if (armor != null) mul *= armor.resistKinetic;
 		packet.Kinetic = kinetic * mul;

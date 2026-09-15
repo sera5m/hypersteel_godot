@@ -55,7 +55,6 @@ public struct ShrapnelRecipe
 	public bool SpawnWorldIfExit;
 }
 
-/// <summary>One impact. Projectile code fills this; Resolve reads it.</summary>
 public struct DamagePacket
 {
 	public StringName Name;
@@ -71,6 +70,8 @@ public struct DamagePacket
 	public StringName Bone;
 	public BodySegment Segment;
 	public Node3D Instigator;
+	public bool FromCover;
+	public Node3D Cover;
 
 	public static DamagePacket KineticHit(float amount, int ap, DamageSource source = DamageSource.Projectile)
 	{

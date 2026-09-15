@@ -5,7 +5,6 @@ namespace Hypersteel.Damage;
 
 public static class DamageProbe
 {
-	/// <summary>Walk parents until ActorEntity. Any child collider is damageable.</summary>
 	public static ActorEntity FindEntity(Node from)
 	{
 		Node n = from;
@@ -18,11 +17,24 @@ public static class DamageProbe
 		return null;
 	}
 
+	/// <summary>Nearest IDamageable walking up. ArmorPiece / CritSocket beat the wearer.</summary>
+	public static IDamageable FindDamageable(Node from)
+	{
+		Node n = from;
+		while (n != null)
+		{
+			if (n is IDamageable d)
+				return d;
+			n = n.GetParent();
+		}
+		return null;
+	}
+
 	public static bool TryHurt(Node from, DamagePacket packet)
 	{
-		ActorEntity actor = FindEntity(from);
-		if (actor == null) return false;
-		actor.Hurt(packet);
+		IDamageable target = FindDamageable(from);
+		if (target == null) return false;
+		target.Hurt(packet);
 		return true;
 	}
 }
