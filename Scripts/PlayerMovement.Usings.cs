@@ -1,7 +1,6 @@
-// Project-wide short names for the player motor. Not an include.
-// SourceMove / HypersteelPhysSauce are visible because they are in the same C# project.
+// Aliases only. Do NOT global-using Godot.Collections or
+// System.Collections.Generic — Dictionary<> becomes ambiguous
+// in Timing.cs / CamShake.cs.
 global using Godot;
-global using Godot.Collections;
 global using MEC;
 global using System;
-global using System.Collections.Generic;
