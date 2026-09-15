@@ -4,7 +4,7 @@ using System;
 [GlobalClass, Icon("res://addons/finite_state_machine/state_icon.png")]
 public partial class PlayerAir : PlayerMovementState
 {
-    public static event Action<Vector3> LastVelocityChangeLanded;
+    public static event Action<Vector3> LastVelocityChangeLanded; // Event that keeps track of the last velocity when landed
     public static event Action PlayerLanded;
 
     private Vector3 _initialDirection;
@@ -16,9 +16,11 @@ public partial class PlayerAir : PlayerMovementState
         if (Movement.OnGround && Movement.FSM.PreviousState is PlayerWallrun)
         {
             Movement.airTime = 0f;
-            Movement.wallRunTimer = 0f;
+            Movement.wallRunTimer = 0f; // Reset the timer
+            
             EmitSignal(SignalName.StateFinished, "PlayerIdle", new());
         }
+
     }
 
     public override void Exit()
@@ -32,14 +34,21 @@ public partial class PlayerAir : PlayerMovementState
         Movement.Stand(delta);
         Movement.airTime += (float)delta;
 
-        if (Movement.OnGround)
-        {
-            Movement.airTime = 0f;
-            Movement.wallRunTimer = 0f;
-            EmitSignal(SignalName.StateFinished, "PlayerIdle", new());
-        }
+        // Handle current speed when in air based on given speed and momentum
 
-        if (Movement.CheckWall(out KinematicCollision3D collision, out String direction)
+        // Wishspeed stays at last grounded cap. Source airaccel does the rest.
+
+        // Handle landing
+		if (Movement.OnGround)
+		{
+			Movement.airTime = 0f;
+            Movement.wallRunTimer = 0f; // Reset the timer
+
+            EmitSignal(SignalName.StateFinished, "PlayerIdle", new());
+		}
+
+        // Wallrun
+        if (Movement.CheckWall(out KinematicCollision3D collision, out String direction) 
         && Movement.wallRunTimer <= Movement.wallRunTime
         && Movement.airTime < 2f
         && !Movement.SendRayInDirection(-Movement.GlobalBasis.Z, 0.5f, out Vector3 normal, out Vector3 point)
@@ -49,6 +58,7 @@ public partial class PlayerAir : PlayerMovementState
             EmitSignal(SignalName.StateFinished, "PlayerWallrun", new());
         }
 
+        // Vertical wallrun
         if (Movement.CheckVerticalWall(out Vector3 verticalWallDir, out Vector3 verticalWallPoint)
             && !Movement.OnGround
             && Movement.FSM.PreviousState is not PlayerWallrun
@@ -59,9 +69,13 @@ public partial class PlayerAir : PlayerMovementState
         }
 
         if (Movement.CheckVault(delta, out Vector3 vaultPoint))
+        {
             EmitSignal(SignalName.StateFinished, "PlayerVault", new());
+        }
 
         if (Movement.CheckLadder())
+        {
             EmitSignal(SignalName.StateFinished, "PlayerLadder", new());
+        }
     }
 }

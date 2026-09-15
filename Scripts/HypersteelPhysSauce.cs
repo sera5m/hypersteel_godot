@@ -1,6 +1,10 @@
 using Godot;
 using System;
 
+/// <summary>
+/// Hypersteel kit modifiers on top of Source ground/air.
+/// Drop this Resource on PlayerMovement.sauce — every knob is Inspector-visible.
+/// </summary>
 [GlobalClass]
 public partial class HypersteelPhysSauce : Resource
 {
