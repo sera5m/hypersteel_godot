@@ -1,17 +1,13 @@
 # Collision damage
 
-Jolt shoves. This component writes blunt HP **only onto its own pawn** after the contact exists (`GetSlideCollision`). The other body, if it also `DoesBluntForce`, applies its own packet. Same source never hits twice (no GMod collider loop).
+Jolt shoves. This component **watches** the contact and waits.
 
-`DoesBluntForce` lives on `CollisionDamage` (anything with a move body). Ballistic projectiles leave this off.
+1. First frame of a pair → open a watch (`RelBefore`, peak closing speed).
+2. While still sliding against that rid → update peak close. No HP.
+3. Pair gone from `GetSlideCollision` (separated) or `MaxWatchSec` → measure
+   `max(0, closeBefore − closeAfter)` — the speed Jolt actually removed.
+4. One blunt packet on **this** body. The other body, if flagged, does its own watch.
 
-## Scale
+`DoesBluntForce` off = prop / bullet, no HP from this path.
 
-`kinetic = inelastic(m, M, vn, e) * cos²θ * stance * footing * (1 - resistBlunt)`
-
-- `e` flesh 0.18, steel 0.58. Higher e = more bounce already in physics, less HP.
-- `cos²θ` = `(v·n)² / |v|²`. Head-on 1, scrape 0. No acos.
-- Stance: air 1, climb 0.7, wallrun 0.6, ground 0.5, crouch 0.2, prone 0.05.
-- `Footing` / `ResistBlunt` are per-character.
-- Wallrun + enough kinetic → `BluntKnockOff`. Huge mass gap → `BluntRagdoll` or `BluntFlinch`.
-
-FSM should `SetStance`. Fallback is floor vs air.
+`kinetic = inelastic(Δv) * cos²θ * stance * footing * (1 - resist)`
