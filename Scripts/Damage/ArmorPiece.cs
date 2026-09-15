@@ -19,6 +19,10 @@ public partial class ArmorPiece : Node3D, IDamageable
 	public bool Shattered { get; private set; }
 	public readonly DamageWatch Watch = new();
 
+	public float LastThrough { get; private set; }
+	public bool LastOverpen { get; private set; }
+	public Vector3 LastBounce { get; private set; }
+
 	[Signal] public delegate void ArmorDamagedEventHandler(float taken, Node3D cause);
 	[Signal] public delegate void ArmorShatteredEventHandler(Node3D cause);
 	[Signal] public delegate void ArmorBrokenEventHandler(Node3D cause);
@@ -32,6 +36,12 @@ public partial class ArmorPiece : Node3D, IDamageable
 		MaxHp = plate.plateHp;
 		Hp = MaxHp;
 		Watch.Enabled = watchEnabled;
+		StampDamageLayer(this);
+		if (colliderPath != null && !colliderPath.IsEmpty)
+		{
+			var col = GetNodeOrNull<CollisionObject3D>(colliderPath);
+			if (col != null) StampDamageLayer(col);
+		}
 	}
 
 	public bool IsDead => Broken || Hp <= 0f;
@@ -39,9 +49,13 @@ public partial class ArmorPiece : Node3D, IDamageable
 	public void Hurt(DamagePacket packet)
 	{
 		ActorEntity wearer = DamageProbe.FindEntity(this);
+		LastThrough = 0f;
+		LastOverpen = false;
 
 		if (Broken)
 		{
+			LastThrough = packet.Kinetic;
+			LastOverpen = true;
 			Forward(wearer, packet);
 			return;
 		}
@@ -51,10 +65,12 @@ public partial class ArmorPiece : Node3D, IDamageable
 
 		Hp = Math.Max(0f, Hp - soak.TakenByCover);
 		Watch.Sample(soak.TakenByCover, Time.GetTicksMsec());
+		LastThrough = soak.Through;
+		LastOverpen = soak.Outcome is ApOutcome.Overpen or ApOutcome.Cavitation || (!soak.Stopped && soak.Through > 0.01f);
+		LastBounce = soak.BounceDir;
 
 		Node3D cause = packet.Instigator;
 		EmitSignal(SignalName.ArmorDamaged, soak.TakenByCover, cause);
-
 		if (soak.Outcome == ApOutcome.Null || soak.Outcome == ApOutcome.Bounce)
 			EmitSignal(SignalName.ArmorBounced, soak.BounceDir, cause);
 
@@ -71,7 +87,11 @@ public partial class ArmorPiece : Node3D, IDamageable
 			EmitSignal(SignalName.ArmorBroken, cause);
 		}
 
-		if (soak.Stopped) return;
+		if (soak.Stopped)
+		{
+			LastOverpen = false;
+			return;
+		}
 
 		if (wearer != null && wearer.WantCoverLog)
 			packet.RecordCover(this, soak.TakenByCover, soak.Through, mount);
@@ -96,4 +116,13 @@ public partial class ArmorPiece : Node3D, IDamageable
 	public void ConcludeDot() => Watch.ConcludeDot(Time.GetTicksMsec());
 
 	static void Forward(ActorEntity wearer, DamagePacket packet) => wearer?.Hurt(packet);
+
+	static void StampDamageLayer(Node n)
+	{
+		if (n is CollisionObject3D co)
+		{
+			co.CollisionLayer |= CollisionLayers.Damage;
+			co.CollisionMask = 0;
+		}
+	}
 }
