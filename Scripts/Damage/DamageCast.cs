@@ -13,10 +13,6 @@ public struct CastHit
 	public Rid Rid;
 }
 
-/// <summary>
-/// Line or capsule tube on World+Damage. Armor halts this cast.
-/// Wearer soak is ArmorPiece.Forward. Overpen respawns behind the exit, same instigator.
-/// </summary>
 public static class DamageCast
 {
 	public const int MaxBounces = 0;
@@ -25,7 +21,7 @@ public static class DamageCast
 
 	public static void Ray(Node worldContext, Vector3 from, Vector3 dir, float length, DamagePacket packet, Rid exclude = default)
 	{
-		Tube(worldContext, from, dir, length, packet, radius: 0f, exclude);
+		Tube(worldContext, from, dir, length, packet, 0f, exclude);
 	}
 
 	public static void Tube(Node worldContext, Vector3 from, Vector3 dir, float length, DamagePacket packet, float radius, Rid exclude = default)
@@ -52,10 +48,7 @@ public static class DamageCast
 
 			IDamageable target = DamageProbe.FindDamageable(hit.Collider);
 			if (target == null)
-			{
-				// World blocker. Bounce later (MaxBounces).
 				return;
-			}
 
 			float before = shot.Kinetic;
 			target.Hurt(shot);
@@ -74,12 +67,11 @@ public static class DamageCast
 			}
 
 			if (hit.Rid.IsValid) excludeSet.Add(hit.Rid);
-			ActorEntity wearer = DamageProbe.FindEntity(hit.Collider);
-			ExcludeWearer(wearer, excludeSet);
+			ExcludeTree(DamageProbe.FindEntity(hit.Collider), excludeSet);
 
 			if (!overpen) return;
 
-			Vector3 throughDir = ThroughDir(dir, hit.Normal);
+			Vector3 throughDir = incoming: dir;
 			Vector3 exit = ExitPoint(hit.Point, throughDir, hit.Collider);
 			shot.Kinetic = through;
 			shot.HasShrapnel = false;
@@ -98,18 +90,19 @@ public static class DamageCast
 		hit = default;
 		Vector3 to = from + dir * length;
 
-		if (radius <= 0.001f)
+		var q = PhysicsRayQueryParameters3D.Create(from, to);
+		q.CollisionMask = CollisionLayers.Trace;
+		q.CollideWithAreas = true;
+		q.CollideWithBodies = true;
+		q.Exclude = ToGodotExclude(exclude);
+		var raw = space.IntersectRay(q);
+		if (raw != null && raw.Count > 0)
 		{
-			var q = PhysicsRayQueryParameters3D.Create(from, to);
-			q.CollisionMask = CollisionLayers.Trace;
-			q.CollideWithAreas = true;
-			q.CollideWithBodies = true;
-			q.Exclude = ToGodotExclude(exclude);
-			var raw = space.IntersectRay(q);
-			if (raw == null || raw.Count == 0) return false;
 			Fill(ref hit, raw, from);
 			return hit.Collider != null;
 		}
+
+		if (radius <= 0.001f) return false;
 
 		var capsule = new CapsuleShape3D { Radius = radius, Height = Math.Max(radius * 2f + 0.01f, 0.05f) };
 		var sq = new PhysicsShapeQueryParameters3D
@@ -120,31 +113,17 @@ public static class DamageCast
 			CollideWithBodies = true,
 			Exclude = ToGodotExclude(exclude),
 			Motion = to - from,
+			Transform = CapsuleAt(from, dir),
 		};
-		sq.Transform = CapsuleAt(from, dir);
-
 		var rest = space.GetRestInfo(sq);
-		if (rest == null || rest.Count == 0)
-		{
-			// Motion miss: sample a ray as fallback so thin tubes still hit.
-			var q = PhysicsRayQueryParameters3D.Create(from, to);
-			q.CollisionMask = CollisionLayers.Trace;
-			q.CollideWithAreas = true;
-			q.CollideWithBodies = true;
-			q.Exclude = ToGodotExclude(exclude);
-			var raw = space.IntersectRay(q);
-			if (raw == null || raw.Count == 0) return false;
-			Fill(ref hit, raw, from);
-			return hit.Collider != null;
-		}
-
+		if (rest == null || rest.Count == 0) return false;
 		Fill(ref hit, rest, from);
 		return hit.Collider != null;
 	}
 
 	static void Fill(ref CastHit hit, Godot.Collections.Dictionary raw, Vector3 from)
 	{
-		hit.Collider = raw["collider"].AsGodotObject() as Node;
+		hit.Collider = raw.ContainsKey("collider") ? raw["collider"].AsGodotObject() as Node : null;
 		hit.Point = raw.ContainsKey("position") ? raw["position"].AsVector3() : from;
 		hit.Normal = raw.ContainsKey("normal") ? raw["normal"].AsVector3() : Vector3.Up;
 		hit.Rid = raw.ContainsKey("rid") ? raw["rid"].AsRid() : default;
@@ -157,38 +136,23 @@ public static class DamageCast
 		Vector3 x = y.Cross(Vector3.Up);
 		if (x.LengthSquared() < 0.001f) x = y.Cross(Vector3.Right);
 		x = x.Normalized();
-		Vector3 z = x.Cross(y);
-		return new Transform3D(new Basis(x, y, z), from);
-	}
-
-	static Vector3 ThroughDir(Vector3 incoming, Vector3 normal)
-	{
-		Vector3 n = normal.LengthSquared() > 0.0001f ? normal.Normalized() : -incoming;
-		// Keep going forward; flip if we hit the backface.
-		if (incoming.Dot(n) > 0f) n = -n;
-		return incoming.Normalized();
+		return new Transform3D(new Basis(x, y, x.Cross(y)), from);
 	}
 
 	static Vector3 ExitPoint(Vector3 entry, Vector3 dir, Node collider)
 	{
 		float extra = ExitPad;
-		if (collider is CollisionObject3D co)
-		{
-			Aabb aabb = new Aabb(co.GlobalPosition, Vector3.One * 0.4f);
-			extra = Math.Max(ExitPad, aabb.Size.Length() * 0.25f);
-		}
+		if (collider is CollisionObject3D)
+			extra = Math.Max(ExitPad, 0.35f);
 		return entry + dir.Normalized() * extra;
 	}
 
-	static void ExcludeWearer(ActorEntity wearer, HashSet<Rid> set)
+	static void ExcludeTree(Node n, HashSet<Rid> set)
 	{
-		if (wearer == null) return;
-		set.Add(wearer.GetRid());
-		foreach (Node child in wearer.FindChildren("*", owned: false))
-		{
-			if (child is CollisionObject3D co)
-				set.Add(co.GetRid());
-		}
+		if (n == null) return;
+		if (n is CollisionObject3D co) set.Add(co.GetRid());
+		foreach (Node child in n.GetChildren())
+			ExcludeTree(child, set);
 	}
 
 	static Godot.Collections.Array<Rid> ToGodotExclude(HashSet<Rid> set)
@@ -202,6 +166,8 @@ public static class DamageCast
 	{
 		int n = Math.Max(1, recipe.Fragments);
 		float each = parent.Kinetic / n * (1f / n);
+		Rid skip = default;
+		foreach (Rid r in exclude) { skip = r; break; }
 		for (int i = 0; i < n; i++)
 		{
 			Vector3 spray = (dir + new Vector3((i % 3) - 1, ((i / 3) % 3) - 1, 0.2f) * 0.15f).Normalized();
@@ -210,8 +176,6 @@ public static class DamageCast
 			frag.HasShrapnel = false;
 			frag.Name = "shrapnel";
 			if (recipe.Piercing) frag.KineticFlags |= KineticFlags.Piercing;
-			Rid skip = default;
-			foreach (Rid r in exclude) { skip = r; break; }
 			Ray(ctx, origin, spray, 6f, frag, skip);
 		}
 	}
