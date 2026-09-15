@@ -71,7 +71,7 @@ public static class DamageCast
 
 			if (!overpen) return;
 
-			Vector3 throughDir = incoming: dir;
+			Vector3 throughDir = dir.Normalized();
 			Vector3 exit = ExitPoint(hit.Point, throughDir, hit.Collider);
 			shot.Kinetic = through;
 			shot.HasShrapnel = false;
@@ -141,9 +141,7 @@ public static class DamageCast
 
 	static Vector3 ExitPoint(Vector3 entry, Vector3 dir, Node collider)
 	{
-		float extra = ExitPad;
-		if (collider is CollisionObject3D)
-			extra = Math.Max(ExitPad, 0.35f);
+		float extra = collider is CollisionObject3D ? Math.Max(ExitPad, 0.35f) : ExitPad;
 		return entry + dir.Normalized() * extra;
 	}
 
