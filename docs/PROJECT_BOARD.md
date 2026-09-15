@@ -19,11 +19,12 @@ https://github.com/sera5m/hypersteel_godot/tree/main/Scripts/Damage
 https://github.com/sera5m/hypersteel_godot/tree/main/Scripts/Health
 Interacts with — Entity, Status, Feelings, future weapons.
 - Limbs done | Types/packet/AP done | Status tweaks | Composition done
-- Plate soak wip | HurtBox in scenes tbd | Flavor text tbd
+- ArmorPiece + DamageReceive almost | HurtBox scenes tbd | Dummy done | Flavor text tbd
 
 ## Entity — almost
 https://github.com/sera5m/hypersteel_godot/tree/main/Scripts/Entity
 - ActorEntity door done | KitComposer done | pawn stubs done
+- Dummy receives through armor done
 - Player scene still PlayerMovement root — wip
 
 ## Status / feelings — tweaks
@@ -41,7 +42,7 @@ Add `Scripts/Weapons/` when begun. Depends on Damage door.
 
 ## AI — not started
 https://github.com/sera5m/hypersteel_godot/tree/main/Scripts/Entity/NpcAI
-- Soldier Critical stub done | BT / Valkarie / morale not started
+- Soldier Critical stub done | Dummy done | BT / Valkarie / morale not started
 
 ## Audio / VFX — wip
 Legacy player audio/particles exist. Damage impact sounds tbd.
@@ -49,4 +50,4 @@ Legacy player audio/particles exist. Damage impact sounds tbd.
 ## Net — not started
 
 ## Focus
-Plate-soak + HurtBox on a dummy before weapons/AI combat. Do not grow PlayerMovement.cs.
+Put an ArmorPiece collider on Dummy in a scene and fire `DamageProbe.TryHurt`. Then weapons. Do not grow PlayerMovement.cs.
