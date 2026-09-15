@@ -23,13 +23,8 @@ public partial class ProjectileMove : Node
 		if (Velocity.LengthSquared() > 0.0001f)
 			Body.LookAt(Body.GlobalPosition + Velocity, Vector3.Up);
 		if (debugTrace || def.debugTrace)
-			DebugDraw(from, Body.GlobalPosition);
+			GD.Print($"[proj] {aSafe(from)} -> {aSafe(Body.GlobalPosition)}");
 	}
 
-	static void DebugDraw(Vector3 a, Vector3 b)
-	{
-		DebugDraw3D? unused = null;
-		// No addon required. MeshInstance debug is optional later.
-		GD.Print($"[proj] {a} -> {b}");
-	}
+	static string aSafe(Vector3 v) => $"{v.X:0.00},{v.Y:0.00},{v.Z:0.00}";
 }
