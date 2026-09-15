@@ -1,13 +1,16 @@
 # Collision damage
 
-Jolt shoves. This component **watches** the contact and waits.
+One rule: Jolt shoves first. HP is a **watch** that closes on **separation** (or timeout). Self-only packet. Never during the first interpenetrating frame.
 
-1. First frame of a pair → open a watch (`RelBefore`, peak closing speed).
-2. While still sliding against that rid → update peak close. No HP.
-3. Pair gone from `GetSlideCollision` (separated) or `MaxWatchSec` → measure
-   `max(0, closeBefore − closeAfter)` — the speed Jolt actually removed.
-4. One blunt packet on **this** body. The other body, if flagged, does its own watch.
+- `CharacterBody3D`: open on `GetSlideCollision`, close when that RID is gone.
+- `RigidBody3D`: open on `BodyEntered`, close on `BodyExited` (same Δv measure).
+- Ballistic projectiles: `DoesBluntForce = false`. They use DamageCast / impact Area.
 
-`DoesBluntForce` off = prop / bullet, no HP from this path.
+## Attach armor without fighting the capsule
 
-`kinetic = inelastic(Δv) * cos²θ * stance * footing * (1 - resist)`
+Worn plates are **not** a second CharacterBody and are **not** Jolt-welded to the pawn.
+
+- Pawn hull: layer PawnPhys only.
+- Armor / HurtBox: `Area3D`, layer Damage, mask 0 (or Damage-only). `Monitorable` for traces. No collision response vs the capsule.
+- Visual: `BoneAttachment3D` or child mesh. Stuck grenade: reparent + freeze move, do not add a joint.
+- Joints (`PinJoint3D`, etc.) are for ragdoll / dragged props, not kit armor.

@@ -3,10 +3,6 @@ using Godot;
 
 namespace Hypersteel.Damage;
 
-/// <summary>
-/// Watches a contact. Jolt owns the shove. After the pair separates, blunt is
-/// computed from measured Δv, once, on this body only.
-/// </summary>
 public partial class CollisionDamage : Node
 {
 	[Export] public bool DoesBluntForce = true;
@@ -41,36 +37,54 @@ public partial class CollisionDamage : Node
 		public bool StillTouching;
 	}
 
-	CharacterBody3D _body;
+	CharacterBody3D _kine;
+	RigidBody3D _rigid;
 	readonly Dictionary<Rid, Watch> _open = new();
 
 	public override void _Ready()
 	{
-		_body = GetParent() as CharacterBody3D ?? GetOwner() as CharacterBody3D;
+		_kine = GetParent() as CharacterBody3D ?? GetOwner() as CharacterBody3D;
+		_rigid = GetParent() as RigidBody3D ?? GetOwner() as RigidBody3D;
+		if (_rigid != null)
+		{
+			_rigid.ContactMonitor = true;
+			_rigid.MaxContactsReported = Math.Max(_rigid.MaxContactsReported, 8);
+			_rigid.BodyEntered += OnRigidEnter;
+			_rigid.BodyExited += OnRigidExit;
+		}
 	}
 
 	public void SetStance(MotionStance s) => Stance = s;
 
 	public override void _PhysicsProcess(double delta)
 	{
-		if (!DoesBluntForce || _body == null) return;
+		if (!DoesBluntForce) return;
 		LastKnockOff = false;
 		LastRagdoll = false;
-		InferStance();
 
-		MarkUntouched();
-		int n = _body.GetSlideCollisionCount();
-		for (int i = 0; i < n; i++)
-			Touch(_body.GetSlideCollision(i));
+		if (_kine != null)
+		{
+			InferStance();
+			MarkUntouched();
+			int n = _kine.GetSlideCollisionCount();
+			for (int i = 0; i < n; i++)
+				TouchSlide(_kine.GetSlideCollision(i));
+			ConcludeSeparated();
+			return;
+		}
 
-		ConcludeSeparated();
+		if (_rigid != null)
+		{
+			RefreshRigidPeak();
+			ConcludeSeparated();
+		}
 	}
 
 	void InferStance()
 	{
 		if (Stance is MotionStance.Climb or MotionStance.Wallrun or MotionStance.Crouch or MotionStance.Prone)
 			return;
-		Stance = _body.IsOnFloor() ? MotionStance.Ground : MotionStance.Air;
+		Stance = _kine != null && _kine.IsOnFloor() ? MotionStance.Ground : MotionStance.Air;
 	}
 
 	void MarkUntouched()
@@ -85,31 +99,59 @@ public partial class CollisionDamage : Node
 		}
 	}
 
-	void Touch(KinematicCollision3D hit)
+	void TouchSlide(KinematicCollision3D hit)
 	{
 		if (hit == null) return;
-		Node other = hit.GetCollider() as Node;
-		Rid rid = hit.GetColliderRid();
+		OpenOrPulse(hit.GetCollider() as Node, hit.GetColliderRid(), hit.GetNormal());
+	}
+
+	void OnRigidEnter(Node other)
+	{
+		if (other is PhysicsBody3D pb)
+			OpenOrPulse(other, pb.GetRid(), Vector3.Up);
+	}
+
+	void OnRigidExit(Node other)
+	{
+		if (other is not PhysicsBody3D pb) return;
+		if (!_open.TryGetValue(pb.GetRid(), out Watch w)) return;
+		w.StillTouching = false;
+		_open[pb.GetRid()] = w;
+	}
+
+	void RefreshRigidPeak()
+	{
+		if (_open.Count == 0 || _rigid == null) return;
+		var keys = new List<Rid>(_open.Keys);
+		foreach (Rid id in keys)
+		{
+			Watch w = _open[id];
+			if (!w.StillTouching) continue;
+			Vector3 rel = RelVel(w.OtherNode);
+			if (Closing(rel, w.Normal) > Closing(w.RelPeakClose, w.Normal))
+				w.RelPeakClose = rel;
+			_open[id] = w;
+		}
+	}
+
+	void OpenOrPulse(Node other, Rid rid, Vector3 nrm)
+	{
 		if (!rid.IsValid || other == null) return;
-
-		Vector3 nrm = hit.GetNormal();
 		Vector3 rel = RelVel(other);
-
 		if (_open.TryGetValue(rid, out Watch w))
 		{
 			w.StillTouching = true;
-			w.Normal = nrm;
-			if (Closing(rel, nrm) > Closing(w.RelPeakClose, nrm))
+			w.Normal = nrm.LengthSquared() > 1e-8f ? nrm : w.Normal;
+			if (Closing(rel, w.Normal) > Closing(w.RelPeakClose, w.Normal))
 				w.RelPeakClose = rel;
 			_open[rid] = w;
 			return;
 		}
-
 		_open[rid] = new Watch
 		{
 			Other = rid,
 			OtherNode = other,
-			Normal = nrm,
+			Normal = nrm.LengthSquared() > 1e-8f ? nrm : Vector3.Up,
 			RelBefore = rel,
 			RelPeakClose = rel,
 			TheirMass = CollisionImpact.MassOf(other, Mass),
@@ -132,31 +174,27 @@ public partial class CollisionDamage : Node
 			Apply(w);
 			done.Add(kv.Key);
 		}
-		foreach (Rid id in done)
-			_open.Remove(id);
+		foreach (Rid id in done) _open.Remove(id);
 	}
 
 	void Apply(Watch w)
 	{
-		IDamageable self = DamageProbe.FindDamageable(_body);
+		Node host = (Node)_kine ?? _rigid;
+		IDamageable self = DamageProbe.FindDamageable(host);
 		if (self == null) return;
 
 		Vector3 relAfter = RelVel(w.OtherNode);
-		// Measured change in closing speed — what Jolt actually took out of the pair.
-		float closeBefore = Closing(w.RelPeakClose, w.Normal);
-		float closeAfter = Closing(relAfter, w.Normal);
-		float taken = Math.Max(0f, closeBefore - closeAfter);
+		float taken = Math.Max(0f, Closing(w.RelPeakClose, w.Normal) - Closing(relAfter, w.Normal));
 		Vector3 measured = w.Normal * taken;
-
 		float raw = CollisionImpact.Kinetic(Mass, w.TheirMass, measured, w.Normal, w.Restitution);
-		float normal01 = CollisionImpact.NormalEnergy01(w.RelPeakClose, w.Normal);
-		float kinetic = raw * normal01 * CollisionImpact.StanceMul(Stance) * Footing * (1f - Math.Clamp(ResistBlunt, 0f, 0.95f));
+		float kinetic = raw * CollisionImpact.NormalEnergy01(w.RelPeakClose, w.Normal)
+			* CollisionImpact.StanceMul(Stance) * Footing * (1f - Math.Clamp(ResistBlunt, 0f, 0.95f));
 		if (kinetic < MinKinetic) return;
 
 		var packet = DamagePacket.KineticHit(kinetic, ap: 1, DamageSource.Contact);
 		packet.KineticFlags = KineticFlags.Blunt;
 		packet.Normal = w.Normal;
-		packet.Instigator = w.OtherNode as Node3D ?? _body;
+		packet.Instigator = w.OtherNode as Node3D ?? host as Node3D;
 		self.Hurt(packet);
 
 		if (kinetic >= RagdollAt)
@@ -176,10 +214,10 @@ public partial class CollisionDamage : Node
 
 	Vector3 RelVel(Node other)
 	{
-		Vector3 rel = _body.Velocity;
-		if (other is CharacterBody3D cb) rel -= cb.Velocity;
-		else if (other is RigidBody3D rb) rel -= rb.LinearVelocity;
-		return rel;
+		Vector3 mine = _kine != null ? _kine.Velocity : _rigid != null ? _rigid.LinearVelocity : Vector3.Zero;
+		if (other is CharacterBody3D cb) return mine - cb.Velocity;
+		if (other is RigidBody3D rb) return mine - rb.LinearVelocity;
+		return mine;
 	}
 
 	static float Closing(Vector3 rel, Vector3 n)
