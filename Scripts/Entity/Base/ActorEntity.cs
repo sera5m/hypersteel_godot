@@ -4,10 +4,6 @@ using Hypersteel.Health;
 
 namespace Hypersteel.Entity;
 
-/// <summary>
-/// Damage door for every pawn. Children (mesh, hurtbox, gun) walk up here.
-/// Never cast the collider to RykoPawn / SoldierPawn.
-/// </summary>
 public partial class ActorEntity : CharacterBody3D, IDamageable
 {
 	[Export] public KitSheet kit;
@@ -16,7 +12,15 @@ public partial class ActorEntity : CharacterBody3D, IDamageable
 	[Export] public FeelingsComponent feelings;
 	[Export] public StringName entityId = "actor";
 
+	[Export] bool wantCoverLog;
+	public bool WantCoverLog
+	{
+		get => wantCoverLog;
+		set => wantCoverLog = value;
+	}
+
 	public HealthBand Band { get; private set; } = HealthBand.High;
+	public System.Collections.Generic.List<CoverReduction> LastCoverLog { get; private set; }
 
 	public override void _Ready()
 	{
@@ -25,7 +29,6 @@ public partial class ActorEntity : CharacterBody3D, IDamageable
 		health ??= FindChild("Health", true, false) as HealthComponent;
 		status ??= GetNodeOrNull<StatusComponent>("Status");
 		feelings ??= GetNodeOrNull<FeelingsComponent>("Feelings");
-
 		if (health != null)
 			health.Damaged += OnHealthDamaged;
 	}
@@ -34,13 +37,15 @@ public partial class ActorEntity : CharacterBody3D, IDamageable
 
 	public void Hurt(DamagePacket packet)
 	{
-		if (health == null) return;
-		health.Hurt(packet);
+		if (wantCoverLog)
+			LastCoverLog = packet.CoverLog;
+		else
+			LastCoverLog = null;
+		health?.Hurt(packet);
 	}
 
 	public bool IsDead => health != null && health.State != null && health.State.Dead;
 
-	/// <summary>Override on a pawn that cares (soldier critical). Drone leaves this empty.</summary>
 	protected virtual void OnHealthDamaged(float taken, int segment)
 	{
 		HealthBand next = BandFromHealth();

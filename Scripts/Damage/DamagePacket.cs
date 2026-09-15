@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Godot;
 using Hypersteel.Health;
 
@@ -72,6 +73,21 @@ public struct DamagePacket
 	public Node3D Instigator;
 	public bool FromCover;
 	public Node3D Cover;
+
+	/// <summary>Null unless the recipient set WantCoverLog. Do not allocate on the hot path.</summary>
+	public List<CoverReduction> CoverLog;
+
+	public void RecordCover(Node3D actor, float reduced, float through, BodySegment mount)
+	{
+		CoverLog ??= new List<CoverReduction>(2);
+		CoverLog.Add(new CoverReduction
+		{
+			Actor = actor,
+			Reduced = reduced,
+			Through = through,
+			Mount = mount,
+		});
+	}
 
 	public static DamagePacket KineticHit(float amount, int ap, DamageSource source = DamageSource.Projectile)
 	{

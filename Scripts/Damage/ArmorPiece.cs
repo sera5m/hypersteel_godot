@@ -4,10 +4,6 @@ using Hypersteel.Health;
 
 namespace Hypersteel.Damage;
 
-/// <summary>
-/// Cover object. Receives hits, soaks, forwards remainder to parent ActorEntity.
-/// Instigator stays the original source. This node is never the attacker.
-/// </summary>
 public partial class ArmorPiece : Node3D, IDamageable
 {
 	[Export] public ArmorPlate plate;
@@ -42,9 +38,11 @@ public partial class ArmorPiece : Node3D, IDamageable
 
 	public void Hurt(DamagePacket packet)
 	{
+		ActorEntity wearer = DamageProbe.FindEntity(this);
+
 		if (Broken)
 		{
-			Forward(packet);
+			Forward(wearer, packet);
 			return;
 		}
 
@@ -52,8 +50,7 @@ public partial class ArmorPiece : Node3D, IDamageable
 		var soak = DamageReceive.Armor(packet, plate.armorLevel, Hp, comAxis, packet.Point, incoming);
 
 		Hp = Math.Max(0f, Hp - soak.TakenByCover);
-		ulong now = Time.GetTicksMsec();
-		Watch.Sample(soak.TakenByCover, now);
+		Watch.Sample(soak.TakenByCover, Time.GetTicksMsec());
 
 		Node3D cause = packet.Instigator;
 		EmitSignal(SignalName.ArmorDamaged, soak.TakenByCover, cause);
@@ -76,11 +73,14 @@ public partial class ArmorPiece : Node3D, IDamageable
 
 		if (soak.Stopped) return;
 
+		if (wearer != null && wearer.WantCoverLog)
+			packet.RecordCover(this, soak.TakenByCover, soak.Through, mount);
+
 		packet.Kinetic = soak.Through;
 		packet.Segment = mount;
 		packet.FromCover = true;
 		packet.Cover = this;
-		Forward(packet);
+		Forward(wearer, packet);
 	}
 
 	public void Repair(float amount, Node3D cause)
@@ -93,14 +93,7 @@ public partial class ArmorPiece : Node3D, IDamageable
 			EmitSignal(SignalName.ArmorRepaired, cause);
 	}
 
-	public void ConcludeDot()
-	{
-		Watch.ConcludeDot(Time.GetTicksMsec());
-	}
+	public void ConcludeDot() => Watch.ConcludeDot(Time.GetTicksMsec());
 
-	void Forward(DamagePacket packet)
-	{
-		ActorEntity wearer = DamageProbe.FindEntity(this);
-		wearer?.Hurt(packet);
-	}
+	static void Forward(ActorEntity wearer, DamagePacket packet) => wearer?.Hurt(packet);
 }
