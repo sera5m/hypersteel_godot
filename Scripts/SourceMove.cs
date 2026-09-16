@@ -68,7 +68,6 @@ public static class SourceMove
 		vel += wishDir * accelSpeed;
 	}
 
-	/// <summary>Soft air clamp: keep c of horizontal speed each second (0.85 sprint / 0.4 slide).</summary>
 	public static void AirDrag(ref Vector3 vel, float keepPerSecond, float dt)
 	{
 		keepPerSecond = Mathf.Clamp(keepPerSecond, 0.01f, 1f);
@@ -144,10 +143,28 @@ public static class SourceMove
 			vel = vel.Normalized() * maxVelocity;
 	}
 
+	public static float StepHeightOf(CharacterBody3D body)
+	{
+		float snap = body.FloorSnapLength;
+		if (snap > 0.05f) return snap;
+		return CapsuleHeight(body) / 3f;
+	}
+
+	public static float CapsuleHeight(CharacterBody3D body)
+	{
+		foreach (Node child in body.GetChildren())
+		{
+			if (child is CollisionShape3D cs && cs.Shape is CapsuleShape3D cap)
+				return cap.Height + cap.Radius * 2f;
+		}
+		return 1.8f;
+	}
+
 	public static SourceSlideHit MoveAndSlideOwn(CharacterBody3D body, ref Vector3 velocity, Vector3 up, float floorMaxAngle, float gravity, HypersteelPhysSauce sauce, int maxSlides = 6)
 	{
 		SourceSlideHit hit = default;
 		float dt = (float)body.GetPhysicsProcessDeltaTime();
+		float stepH = StepHeightOf(body);
 
 		Vector3 checkMotion = velocity * (1f / 60f);
 		checkMotion.Y -= gravity * (1f / 360f);
@@ -176,17 +193,42 @@ public static class SourceMove
 				hit.FloorNormal = normal;
 				motion = collision.GetRemainder().Slide(normal);
 				velocity = velocity.Slide(normal);
+				continue;
 			}
-			else
+
+			hit.HitWall = true;
+			hit.WallNormal = normal;
+			hit.WallImpactSpeed = Mathf.Max(hit.WallImpactSpeed, -velocity.Dot(normal));
+
+			if (TryStepUp(body, collision.GetRemainder(), up, stepH, floorMaxAngle))
 			{
-				hit.HitWall = true;
-				hit.WallNormal = normal;
-				hit.WallImpactSpeed = Mathf.Max(hit.WallImpactSpeed, -velocity.Dot(normal));
-				Rebound(ref velocity, normal, sauce);
-				motion = collision.GetRemainder().Slide(normal);
+				hit.OnFloor = true;
+				break;
 			}
+
+			Rebound(ref velocity, normal, sauce);
+			motion = collision.GetRemainder().Slide(normal);
 		}
 
 		return hit;
+	}
+
+	static bool TryStepUp(CharacterBody3D body, Vector3 remainder, Vector3 up, float stepH, float floorMaxAngle)
+	{
+		if (stepH < 0.05f) return false;
+		Vector3 horiz = remainder;
+		horiz.Y = 0f;
+		if (horiz.LengthSquared() < 1e-6f) return false;
+
+		KinematicCollision3D ceiling = body.MoveAndCollide(up * stepH, testOnly: true);
+		if (ceiling != null && ceiling.GetTravel().Length() < stepH * 0.25f)
+			return false;
+
+		body.GlobalPosition += up * stepH;
+		KinematicCollision3D fwd = body.MoveAndCollide(horiz);
+		body.MoveAndCollide(-up * stepH);
+
+		if (fwd == null) return true;
+		return fwd.GetNormal().AngleTo(up) < floorMaxAngle;
 	}
 }
