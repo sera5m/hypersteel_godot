@@ -27,7 +27,7 @@
 background_mode = 2
 background_energy_multiplier = 1.48
 sky = ExtResource("2_fb8vh")
-sky_rotation = Vector3(0, 3.6904035, 0)
+sky_rotation = Vector3(0, 11.018727, 0)
 ambient_light_source = 3
 reflected_light_source = 2
 tonemap_mode = 2
@@ -905,7 +905,7 @@ collision_layer = 2
 size = Vector3(20, 90, 20)
 
 [node name="ConcreteCSGBox3D2" type="CSGBox3D" parent="Stage/Node3D7" unique_id=1830224704 groups=["Concrete"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5597286, 46.490604, -65.708466)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5597286, 46.490604, -35.557266)
 material_override = ExtResource("2_buung")
 use_collision = true
 collision_layer = 2
