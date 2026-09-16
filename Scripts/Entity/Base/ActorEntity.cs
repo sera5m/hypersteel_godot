@@ -42,7 +42,7 @@ public partial class ActorEntity : CharacterBody3D, IDamageable
 
 	public void Hurt(Hit hit) => health?.Hurt(hit);
 
-	public void Hurt(DamagePacket packet)
+	public virtual void Hurt(DamagePacket packet)
 	{
 		if (wantCoverLog)
 			LastCoverLog = packet.CoverLog;

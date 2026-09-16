@@ -1,21 +1,21 @@
+using Godot;
+using Hypersteel.Damage;
+
 public partial class PlayerMovement
 {
+	[Export] public bool debugDamageRay = true;
+
 	private void HandleJump(float jumpSpeed)
 	{
-		// Handle Jump (Must refactor)
 		bool canCoyote = sauce == null || sauce.coyoteAffectsJump;
 		if (Input.IsActionJustPressed("jump") && ((ActuallyGrounded && !ceilingRay.IsColliding()) || (InCoyote && canCoyote) || airTime < _coyoteTime)
 			&& (!stepCast.IsColliding() || FSM.CurrentState is PlayerIdle))
 		{
-			// Jump
 			if (_jumpsDone < _jumps)
-			{
 				Jump(jumpSpeed);
-			}
 		}
 		else if (Input.IsActionJustPressed("jump") && _jumpsDone > 0 && _jumpsDone < _jumps)
 		{
-			// Jump
 			Jump(jumpSpeed);
 		}
 	}
@@ -27,22 +27,33 @@ public partial class PlayerMovement
 			SourceMove.LurchIntoWish(ref playerVelocity, wish, sauce.jumpLurch);
 
 		if (FSM.CurrentState is PlayerVault)
-		{
 			Velocity = playerVelocity + jumpSpeed * Vector3.Up;
-		}
 		else
-		{
 			playerVelocity.Y = jumpSpeed;
-		}
-		
+
 		_jumpsDone++;
+	}
+
+	public override void _UnhandledInput(InputEvent @event)
+	{
+		if (!debugDamageRay) return;
+		if (@event is InputEventMouseButton mb && mb.Pressed && mb.ButtonIndex == MouseButton.Right)
+		{
+			Camera3D cam = _camera;
+			if (cam == null) return;
+			var packet = DamagePacket.KineticHit(45f, 4, DamageSource.Beam);
+			packet.Name = "debug-ray";
+			packet.KineticFlags = KineticFlags.Piercing;
+			packet.Instigator = this;
+			DamageCast.Ray(this, cam.GlobalPosition, -cam.GlobalTransform.Basis.Z, 200f, packet, GetRid());
+			GD.Print("[dbg-ray] fire");
+		}
 	}
 
 	public void ApplyFireRecoil(float strength)
 	{
 		if (sauce == null || !sauce.recoilEnabled) return;
-		Vector3 back = GlobalBasis.Z; // Godot forward is -Z, so +Z is reverse of look
-		playerVelocity += back * strength * sauce.fireRecoilScale;
+		playerVelocity += GlobalBasis.Z * strength * sauce.fireRecoilScale;
 		Velocity = playerVelocity;
 	}
 
@@ -65,16 +76,9 @@ public partial class PlayerMovement
 
 	public void WallJump(Vector3 wallDir)
 	{
-		playerVelocity.Y = wallJumpSpeed / 2; 
+		playerVelocity.Y = wallJumpSpeed / 2;
 		direction = ((wallDir.Normalized()) + (-_camera.GlobalBasis.Z.Normalized() / 4)) * (wallJumpSpeed / 16);
 	}
 
-	public void RollPlayer(Vector3 directionFromAir)
-	{
-		// Check if current direction from camera is close to the direction from air.
-		
-		// Check if there's some forward velocity
-
-		// Then land and execute animation.
-	}
+	public void RollPlayer(Vector3 directionFromAir) { }
 }
