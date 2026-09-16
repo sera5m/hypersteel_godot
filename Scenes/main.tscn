@@ -22,12 +22,13 @@
 [ext_resource type="PackedScene" uid="uid://ddp62lqxgj3c2" path="res://Scenes/PlayerController/Player.tscn" id="14_qv7ho"]
 [ext_resource type="PackedScene" uid="uid://bqekf67x42h0i" path="res://Models/Windmill/wind_mill.tscn" id="19_l7anu"]
 [ext_resource type="PackedScene" uid="uid://c3n5ryfjyi3h1" path="res://Models/TubeLight/tube_light.tscn" id="20_gox77"]
+[ext_resource type="Script" uid="uid://d2ym0rfme4c24" path="res://Scripts/HypersteelPhysSauce.cs" id="22_gt3je"]
 
 [sub_resource type="Environment" id="Environment_2lvxy"]
 background_mode = 2
 background_energy_multiplier = 1.48
 sky = ExtResource("2_fb8vh")
-sky_rotation = Vector3(0, 11.018727, 0)
+sky_rotation = Vector3(0, 5.6919746, 0)
 ambient_light_source = 3
 reflected_light_source = 2
 tonemap_mode = 2
@@ -131,6 +132,10 @@ size = Vector3(14.795, 1, 7.7)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_qhwn0"]
 size = Vector3(14.36, 1, 10.975)
+
+[sub_resource type="Resource" id="Resource_616am"]
+script = ExtResource("22_gt3je")
+metadata/_custom_type_script = "uid://d2ym0rfme4c24"
 
 [node name="World" type="Node3D" unique_id=933387788]
 
@@ -905,7 +910,7 @@ collision_layer = 2
 size = Vector3(20, 90, 20)
 
 [node name="ConcreteCSGBox3D2" type="CSGBox3D" parent="Stage/Node3D7" unique_id=1830224704 groups=["Concrete"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5597286, 46.490604, -35.557266)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5597286, 46.490604, -65.00008)
 material_override = ExtResource("2_buung")
 use_collision = true
 collision_layer = 2
@@ -2263,6 +2268,21 @@ shape = SubResource("BoxShape3D_qhwn0")
 
 [node name="Player" parent="." unique_id=1194309894 instance=ExtResource("14_qv7ho")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.7845, 13.3935, -79.263)
+walkingSpeed = 6.0
+sprintingSpeed = 10.0
+maxSpeed = 18.0
+accelerationRate = 3.0
+lerpSpeed = 15.0
+sauce = SubResource("Resource_616am")
+_jumpVelocity = 6.0
+_coyoteTime = 0.2
+slideSpeed = 14.0
+wallRunTime = 3.0
+wallRunSpeed = 20.0
+verticalRunHeight = 2.0
+mouseSensitivityX = 0.4
+mouseSensitivityY = 0.4
+_maxPlayerVelocity = 20.0
 
 [node name="WindMill" parent="." unique_id=711896108 groups=["Metal"] instance=ExtResource("19_l7anu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.7226, 32.0899, -139.402)

@@ -1,7 +1,7 @@
 shader_type canvas_item;
 
 uniform sampler2D offset_image : hint_default_white;
-uniform float strength = 1.0;
+uniform float strength = 0.05;
 uniform sampler2D SCREEN_TEXTURE:hint_screen_texture, filter_linear_mipmap;
 
 void fragment() {

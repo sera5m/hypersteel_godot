@@ -102,7 +102,7 @@ public partial class PlayerMovement : CharacterBody3D
 	[Export] private RayCast3D _vaultCheck;
 	[Export] private ShapeCast3D _vaultCast;
 	[Export] public ShapeCast3D stepCast;
-    [Export] public float vaultMomentum {private set; get;}
+	[Export] public float vaultMomentum {private set; get;}
 	[Export] public float vaultJumpVelocity {private set; get;}
 	private Vector3 _vaultProjection = Vector3.Zero;
 	private Vector3 _vaultPoint = Vector3.Zero;
@@ -180,8 +180,8 @@ public partial class PlayerMovement : CharacterBody3D
 	// Get the gravity from the project settings to be synced with RigidBody nodes.
 	public float gravity = ProjectSettings.GetSetting("physics/3d/default_gravity").AsSingle();
 
-    public override void _Ready()
-    {
+	public override void _Ready()
+	{
 		FSM = GetNode<GodotParadiseFiniteStateMachine>("FSM");
 		_wallRunStateNode = (PlayerWallrun)FSM.GetStateByName("PlayerWallrun");
 
@@ -196,16 +196,16 @@ public partial class PlayerMovement : CharacterBody3D
 
 		_minFov = _camera.Fov;
 		sauce ??= new HypersteelPhysSauce();
-        Input.MouseMode = Input.MouseModeEnum.Captured;
+		Input.MouseMode = Input.MouseModeEnum.Captured;
 
 		// Events
 		PlayerAir.PlayerLanded += ResetJumps;
-    }
+	}
 
-    public override void _ExitTree()
-    {
-        PlayerAir.PlayerLanded -= ResetJumps;
-    }
+	public override void _ExitTree()
+	{
+		PlayerAir.PlayerLanded -= ResetJumps;
+	}
 
 	public override void _PhysicsProcess(double delta)
 	{

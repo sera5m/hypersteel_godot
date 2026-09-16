@@ -2,8 +2,8 @@ using Godot;
 
 public partial class MotionBlur : MeshInstance3D
 {
-	[Export] public float minSpeed = 15f;
-	[Export] public float intensity = 0.12f;
+	[Export] public float minSpeed = 25f;
+	[Export] public float intensity = 0.06f;
 
 	private Camera3D _cam;
 	private Vector3 _camPosPrev = Vector3.Zero;
