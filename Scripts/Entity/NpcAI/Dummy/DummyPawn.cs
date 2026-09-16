@@ -1,21 +1,24 @@
 using Godot;
 using Hypersteel.Damage;
+using Hypersteel.Health;
 
 namespace Hypersteel.Entity.NpcAI;
 
-/// <summary>
-/// Test dummy. Inherits ActorEntity so DamageProbe + kit compose work.
-/// Attach ArmorPiece children on chest/arm. Shoot the plate collider.
-/// </summary>
 public partial class DummyPawn : ActorEntity
 {
 	[Export] public bool logHits = true;
+	[Export] public bool buildStandIn = true;
 
 	public override void _Ready()
 	{
 		base._Ready();
 		entityId = "dummy";
 		kit ??= new KitSheet { hasHealth = true, hasStatus = true, hasFeelings = false };
+		if (buildStandIn)
+			HumanoidStandIn.Attach(this);
+
+		if (health != null)
+			health.Damaged += OnHp;
 
 		foreach (Node child in GetChildren())
 		{
@@ -25,6 +28,23 @@ public partial class DummyPawn : ActorEntity
 				plate.ArmorBroken += OnPlateBroken;
 			}
 		}
+	}
+
+	public override void Hurt(DamagePacket packet)
+	{
+		if (logHits)
+		{
+			GD.Print($"[dummy] {packet.Name} {packet.Kinetic:0.0} {packet.Source} seg={packet.Segment} bone={packet.Bone} cover={packet.FromCover}");
+			if (health?.State != null)
+				GD.Print($"[dummy] torso={health.State.HpOf(BodySegment.Torso):0} head={health.State.HpOf(BodySegment.Head):0} arm={health.State.HpOf(BodySegment.Arm):0} dead={health.State.Dead}");
+		}
+		base.Hurt(packet);
+	}
+
+	void OnHp(float taken, int segment)
+	{
+		if (logHits)
+			GD.Print($"[dummy] hp -{taken:0.0} segment={(BodySegment)segment}");
 	}
 
 	void OnPlateDamaged(float taken, Node3D cause)
