@@ -11,9 +11,9 @@ public partial class DummyPawn : ActorEntity
 
 	public override void _Ready()
 	{
-		base._Ready();
 		entityId = "dummy";
 		kit ??= new KitSheet { hasHealth = true, hasStatus = true, hasFeelings = false };
+		base._Ready();
 		if (buildStandIn)
 			HumanoidStandIn.Attach(this);
 
@@ -36,7 +36,7 @@ public partial class DummyPawn : ActorEntity
 		{
 			GD.Print($"[dummy] {packet.Name} {packet.Kinetic:0.0} {packet.Source} seg={packet.Segment} bone={packet.Bone} cover={packet.FromCover}");
 			if (health?.State != null)
-				GD.Print($"[dummy] torso={health.State.HpOf(BodySegment.Torso):0} head={health.State.HpOf(BodySegment.Head):0} arm={health.State.HpOf(BodySegment.Arm):0} dead={health.State.Dead}");
+				GD.Print($"[dummy] torso={health.State.HpOf(BodySegment.Torso):0} head={health.State.HpOf(BodySegment.Head):0} armL={health.State.HpOf(BodySegment.ArmL):0} dead={health.State.Dead}");
 		}
 		base.Hurt(packet);
 	}
