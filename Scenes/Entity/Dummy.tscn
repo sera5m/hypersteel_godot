@@ -1,0 +1,44 @@
+[gd_scene load_steps=6 format=3 uid="uid://dummy_humanoid"]
+
+[ext_resource type="Script" path="res://Scripts/Entity/NpcAI/Dummy/DummyPawn.cs" id="1_dummy"]
+[ext_resource type="Script" path="res://Scripts/Health/HealthComponent.cs" id="2_health"]
+[ext_resource type="Script" path="res://Scripts/Damage/ArmorPiece.cs" id="3_plate"]
+[ext_resource type="PackedScene" path="res://assets/charachters/ryko_pre_tweak_human/SKM_ryko.fbx" id="4_mesh"]
+
+[sub_resource type="CapsuleShape3D" id="HullShape"]
+radius = 0.28
+height = 1.7
+
+[sub_resource type="BoxShape3D" id="ChestBox"]
+size = Vector3(0.42, 0.5, 0.28)
+
+[node name="Dummy" type="CharacterBody3D"]
+collision_layer = 1
+collision_mask = 2
+script = ExtResource("1_dummy")
+entityId = &"dummy"
+buildStandIn = false
+logHits = true
+
+[node name="Hull" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+shape = SubResource("HullShape")
+
+[node name="Visual" parent="." instance=ExtResource("4_mesh")]
+
+[node name="Health" type="Node" parent="."]
+script = ExtResource("2_health")
+
+[node name="PlateChest" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0.12)
+script = ExtResource("3_plate")
+mount = 0
+
+[node name="Hit" type="Area3D" parent="PlateChest"]
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+monitorable = true
+
+[node name="Shape" type="CollisionShape3D" parent="PlateChest/Hit"]
+shape = SubResource("ChestBox")
