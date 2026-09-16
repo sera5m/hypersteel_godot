@@ -1,5 +1,6 @@
 using Godot;
 using Hypersteel.Health;
+using Hypersteel.Abilities.Kits;
 
 namespace Hypersteel.Damage;
 
@@ -27,6 +28,9 @@ public static class KitComposer
 			var feelings = new FeelingsComponent { Name = "Feelings", rules = kit.feelings ?? new FeelingsRules() };
 			host.AddChild(feelings);
 		}
+
+		if (kit.hasJumpKit)
+			JumpKitMount.Attach(host, kit.jumpKit);
 	}
 
 	static T Find<T>(Node host) where T : Node

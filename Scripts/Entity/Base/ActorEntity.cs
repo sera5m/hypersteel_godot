@@ -1,6 +1,7 @@
 using Godot;
 using Hypersteel.Damage;
 using Hypersteel.Health;
+using Hypersteel.Abilities.Kits;
 
 namespace Hypersteel.Entity;
 
@@ -10,6 +11,7 @@ public partial class ActorEntity : CharacterBody3D, IDamageable
 	[Export] public HealthComponent health;
 	[Export] public StatusComponent status;
 	[Export] public FeelingsComponent feelings;
+	[Export] public JumpKit jumpKit;
 	[Export] public StringName entityId = "actor";
 	[Export] public float Mass = 80f;
 	[Export] public bool collisionDamage = true;
@@ -31,6 +33,9 @@ public partial class ActorEntity : CharacterBody3D, IDamageable
 		health ??= FindChild("Health", true, false) as HealthComponent;
 		status ??= GetNodeOrNull<StatusComponent>("Status");
 		feelings ??= GetNodeOrNull<FeelingsComponent>("Feelings");
+		jumpKit ??= GetNodeOrNull<JumpKit>("JumpKit");
+		if (jumpKit != null && jumpKit.Motor == null)
+			jumpKit.BindBody(this);
 		if (collisionDamage && GetNodeOrNull<CollisionDamage>("CollisionDamage") == null)
 		{
 			var cd = new CollisionDamage { Name = "CollisionDamage", Mass = Mass };

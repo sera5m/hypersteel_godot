@@ -7,11 +7,14 @@ Tokens — done | almost | tweaks | wip | 35% | tbd | not started
 
 ## Movement — almost
 https://github.com/sera5m/hypersteel_godot/tree/main/Scripts
-Interacts with — Entity motor slot, FSM. Depends on — CharacterBody3D, first-party Jolt.
+https://github.com/sera5m/hypersteel_godot/tree/main/Scripts/Abilities/Kits/JumpKit
+Interacts with — Entity motor slot, FSM, JumpKit. Depends on — CharacterBody3D, first-party Jolt.
 - Source ground/air almost
 - Sauce Resource done
 - PlayerMovement partials done
 - FSM verbs done as impulses
+- JumpKit box + IMoveMotor + compose flag wip
+- PlayerMovement does not yet honor GravityScale / skip Source during dash lock
 - In-game tune tweaks
 
 ## Damage / Health — almost
@@ -26,6 +29,7 @@ https://github.com/sera5m/hypersteel_godot/tree/main/Scripts/Entity
 - ActorEntity door done | KitComposer done | pawn stubs done
 - Dummy receives through armor done
 - Player scene still PlayerMovement root — wip
+- jumpKit slot on ActorEntity wip
 
 ## Status / feelings — tweaks
 https://github.com/sera5m/hypersteel_godot/tree/main/Scripts/Damage
