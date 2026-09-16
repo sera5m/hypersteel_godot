@@ -8,6 +8,7 @@ public readonly struct Hit
 	public readonly DamageKind Kind;
 	public readonly BodySegment Segment;
 	public readonly Vector3 Point;
+public readonly Vector3 origin; //for hit traces, they might originate from enemy gun barrel
 	public readonly Vector3 Normal;
 	public readonly Node3D Instigator;
 	public readonly StringName Bone;
