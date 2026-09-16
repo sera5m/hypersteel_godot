@@ -2,7 +2,7 @@ shader_type spatial;
 render_mode depth_test_disabled, depth_draw_never, unshaded, cull_disabled;
 
 uniform sampler2D SCREEN_TEXTURE : hint_screen_texture;
-uniform float motion_blur_strength = 0.5;
+uniform float motion_blur_strength = 0.2;
 uniform int num_samples = 16;
 uniform vec3 angular_velocity; // Camera's angular velocity
 uniform vec3 linear_velocity;
