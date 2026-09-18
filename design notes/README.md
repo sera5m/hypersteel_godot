@@ -11,6 +11,8 @@ Systems: this folder + engine `docs/` (damage is locked there).
 | `09-entity-perks.md` | Property / hook perks, AI uses same kits |
 | `10-mp-cosmetic.md` | Race, segments, paint, hands |
 | `11-loadout-cards.md` | Ryko + Crusher as tests |
+| `12-melee.md` | Left-hand toggle, packets, grab |
+| `13-guns.md` | Right-hand board, Type 88, alts |
 
 Write what the pawn **is**. Avoid-list lives only here.
 
