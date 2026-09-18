@@ -41,6 +41,8 @@ Post-scream vetoes can be `no` (still flat). Earlier = system-flavored.
 ## Movement / kit
 Dash / air dash from electrolysis + plasma ports. Pile-driver left hand. Laser cutter. Glory-kills. Mech on/off in spikes. Rail stolen from Redline. Perks are MP toys; campaign is scenes.
 
+Grab: Ryko throws almost anything. Enduring can grab her back. Valkarie jets out of a hold. Arsonist cooks you off. Sniper and Redline stick. The bike is hold-or-slip. Full table in `12-melee.md`.
+
 ## Heal
 Usually armor-strip / gibs / blood. Maw is lore. Kill-to-heal is honest without a cannibal cutscene.
 

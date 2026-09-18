@@ -127,7 +127,7 @@ MGL cousin. **Softball** projectile velocity.
 | Smart SMG | Explosive shaped gyrojet | Lock + 10% powder dud |
 | Bipolar | Laser × N | Laser × N/2 + lightning |
 | DP180 | Kinetic twin | Seeker nade |
-| Big Iron | Explosive slow | Bounce × 3 weak |
+| Big Iron | Explosive slow | Bounce ×3 weak |
 
 Campaign cousins that overlap: Volcano is Pyro’s shotgun in her hands. Cutter / coil notes in `06` fold into the list below.
 
