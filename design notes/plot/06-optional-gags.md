@@ -7,4 +7,4 @@ Teen thief / rail-hobbyist, built like toothpicks, cornered by a shakedown. No d
 
 She hits the guy at ~40mph without targeting him as a quest. He liquefies. She does not explain. Eevee internal: oh my god.
 
-Do not name “Eevee Eevee Eevee” on screen. Do not sequel-hook her. One room. Leave.
+this is a reference to vague ideas of a stealth game i was thinking of in high school where eevee had a coilgun she made and was on some marvin heymayer shit instead of a typical shooter. long since lost or scrapped, because it wouldn't be good
