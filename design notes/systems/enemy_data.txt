@@ -1,0 +1,65 @@
+basic framework for working from to determine ai stats:
+
+
+Enemy name:
+
+Reference image:
+
+Breif description :
+
+Base info:
+
+-Enemy class
+-mass
+-height/width
+-walk speed
+-sprint speed, if applicable
+-can recover from glory kill.
+-can enter glory kill state multiple times
+-can be picked up
+-turn rate (degrees/s)
+-tick time
+-can jump
+
+
+Brain info
+Intelegence
+Fear resistance
+Can be enraged
+Combat style
+How does this ai behave with a team
+Can this AI heal itself :
+Can be healed by: (ai with [item])
+On grabbed by enemy player reaction: try to break hold/try to suicide grenade,etc,etc
+
+Body info:
+Damage weaknesses
+Damage resistances
+Armor tier and data
+Health
+Weak spots
+Strong spots
+crit spots
+
+Combat:
+
+Main weapon
+Secondary weapon
+Melee weapon
+
+Weapon switch Condition (under what circumstances will the ai use a rifle or pistol if it has both? eg: if ai has a sniper and isn't skilled enough to quickscope, it will swap to a pistol if you're close enough to it for 0.6 seconds)
+
+Ordinance (like hand grenades)
+
+Style:
+-personality
+-how voice sounds
+-gender/appearance/remarkable traits
+-animation style (what it reflects on personality, if it's not just simple tactical whatnot)
+
+
+Abilities:
+-passive (eg 2% health Regen/s or a high sight radius or passive radar or additional senses)
+-active (eg flight,or backpacks)
+
+[warning, this document is old, but at least partially reflects the current framework]
