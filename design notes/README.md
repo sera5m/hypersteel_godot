@@ -19,3 +19,4 @@ Systems: this folder + engine `docs/` (damage is locked there).
 | `16-ai-behavior.md` | AI uses the same kits |
 | `17-items-ammo.md` | Shared ammo + bag |
 | `18-weather-ambiance.md` | Weather field; Status is a handoff |
+| `21-enemy-roster.md` | Unreal roster ingest. Kits, not classes |
