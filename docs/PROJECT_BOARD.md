@@ -46,7 +46,9 @@ Add `Scripts/Weapons/` when begun. Depends on Damage door.
 
 ## AI — not started
 https://github.com/sera5m/hypersteel_godot/tree/main/Scripts/Entity/NpcAI
-- Soldier Critical stub done | Dummy done | BT / Valkarie / morale not started
+- Soldier Critical stub done | Dummy done | roster law done (`design notes/21-enemy-roster.md`)
+- BT / perception not started (order: dummy soldier shoots/flinches/dies → scout alert → squad leader coord)
+- Valkarie / morale not started
 
 ## Audio / VFX — wip
 Legacy player audio/particles exist. Damage impact sounds tbd.
