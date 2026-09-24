@@ -3,7 +3,6 @@ using Hypersteel.Entity.NpcAI.Brain;
 
 namespace Hypersteel.Entity.NpcAI;
 
-/// <summary>Local hook only. Health does not know what "critical" means. Owns NpcBrain.</summary>
 public partial class SoldierPawn : ActorEntity
 {
 	public bool Critical { get; private set; }
@@ -13,6 +12,7 @@ public partial class SoldierPawn : ActorEntity
 	{
 		base._Ready();
 		entityId = "soldier";
+		stats ??= new EntityStats { Mass = 80f, Strength = 1f, Agility = 1f, Speed = 1f };
 
 		Brain = GetNodeOrNull<NpcBrain>("NpcBrain");
 		if (Brain == null)
@@ -25,10 +25,13 @@ public partial class SoldierPawn : ActorEntity
 					RoleId = "soldier",
 					DefaultVerb = NpcVerb.MoveAndAttack,
 					PreferredRange = 18f
-				}
+				},
+				Stats = stats as NpcStats ?? new NpcStats()
 			};
 			AddChild(Brain);
 		}
+		else
+			Brain.Stats = stats as NpcStats ?? Brain.Stats;
 	}
 
 	protected override void OnHealthBand(HealthBand from, HealthBand to)
