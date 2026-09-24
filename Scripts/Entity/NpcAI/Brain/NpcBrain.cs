@@ -1,4 +1,5 @@
 using Godot;
+using Hypersteel.Damage;
 
 namespace Hypersteel.Entity.NpcAI.Brain;
 
@@ -12,6 +13,7 @@ public partial class NpcBrain : Node
 	[Export] public bool UseMeshConsensus;
 	[Export] public Node3D AssignedTarget;
 	[Export] public float HazardRayMeters = 3.5f;
+	[Export] public float RollMinTaken = 8f;
 
 	public NpcReflex Reflex { get; } = new();
 	public NpcVision Vision { get; } = new();
@@ -31,6 +33,10 @@ public partial class NpcBrain : Node
 		Stats ??= new NpcStats();
 		Loadout.Bind(_body);
 		if (_body != null) _body.AddToGroup("npc_squad");
+		if (_body?.health != null)
+			_body.health.Damaged += OnDamaged;
+		if (_body?.feelings != null)
+			_body.feelings.Flinch += OnFlinch;
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -52,6 +58,26 @@ public partial class NpcBrain : Node
 		ActiveVerb = NpcMacroMicro.Rewrite(asked, Sense, _body);
 		NpcExecution.Step(_body, Role, ActiveVerb, Sense, dt);
 		TryShoot();
+	}
+
+	void OnDamaged(float taken, int segment)
+	{
+		if (taken < RollMinTaken) return;
+		RollAway();
+	}
+
+	void OnFlinch(float intensity)
+	{
+		if (intensity < 0.35f) return;
+		RollAway();
+	}
+
+	void RollAway()
+	{
+		if (_body == null) return;
+		Actions.Cancel();
+		var from = Sense.HasLastKnown ? Sense.LastKnownTarget : _body.GlobalPosition + _body.GlobalTransform.Basis.Z;
+		Reflex.TryHitRoll(_body, from);
 	}
 
 	void TickSense()
