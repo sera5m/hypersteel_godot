@@ -12,6 +12,7 @@ public partial class ActorEntity : CharacterBody3D, IDamageable
 	[Export] public StatusComponent status;
 	[Export] public FeelingsComponent feelings;
 	[Export] public JumpKit jumpKit;
+	[Export] public EntityStats stats;
 	[Export] public StringName entityId = "actor";
 	[Export] public float Mass = 80f;
 	[Export] public bool collisionDamage = true;
@@ -26,8 +27,12 @@ public partial class ActorEntity : CharacterBody3D, IDamageable
 	public HealthBand Band { get; private set; } = HealthBand.High;
 	public System.Collections.Generic.List<CoverReduction> LastCoverLog { get; private set; }
 
+	public EntityStats Stats => stats ??= new EntityStats { Mass = Mass };
+
 	public override void _Ready()
 	{
+		stats ??= new EntityStats { Mass = Mass };
+		Mass = stats.Mass;
 		KitComposer.Compose(this, kit);
 		health ??= GetNodeOrNull<HealthComponent>("Health");
 		health ??= FindChild("Health", true, false) as HealthComponent;
