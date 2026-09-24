@@ -9,11 +9,16 @@ public partial class Gun : Node3D
 	[Export] public GunUseHint Use;
 	[Export] public bool AcceptsSniperGlass = true;
 	[Export] public bool HasCanted = true;
+	[Export] public bool HasModeSwitch;
+	[Export] public int ModeCount = 1;
 	[Export] public GunAmmoFamily Ammo = GunAmmoFamily.Rifle;
 	[Export] public float BaseHandling = 0.30f;
 
 	public SightDef Mounted { get; private set; }
 	public bool CantedLive { get; private set; }
+	public bool Ads { get; private set; }
+	public bool Inspecting { get; private set; }
+	public int Mode { get; private set; }
 	public readonly List<SightDef> Bag = new();
 	public readonly GunKit Kit = new();
 
@@ -25,6 +30,17 @@ public partial class Gun : Node3D
 
 	public float ReloadFor(float baseReload, float agility, float useTime) =>
 		GunKit.ReloadSeconds(baseReload, Kit.Reload, agility, useTime);
+
+	public void SetAds(bool on) => Ads = on;
+
+	public void SetInspect(bool on) => Inspecting = on;
+
+	public bool CycleMode()
+	{
+		if (!HasModeSwitch || ModeCount < 2) return false;
+		Mode = (Mode + 1) % ModeCount;
+		return true;
+	}
 
 	public bool Mount(SightDef sight)
 	{
