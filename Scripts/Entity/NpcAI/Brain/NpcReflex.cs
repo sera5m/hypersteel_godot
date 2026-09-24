@@ -1,4 +1,5 @@
 using Godot;
+using Hypersteel.Abilities.Kits;
 
 namespace Hypersteel.Entity.NpcAI.Brain;
 
@@ -14,16 +15,20 @@ public sealed class NpcReflex
 	public bool TryNadeLeap(ActorEntity body, Vector3 away)
 	{
 		if (body == null) return false;
+
+		var flat = away;
+		flat.Y = 0f;
+		if (flat.LengthSquared() < 0.01f)
+			flat = -body.GlobalTransform.Basis.Z;
+		flat = flat.Normalized();
+
+		bool pulsed = false;
 		if (body.jumpKit != null)
-			body.jumpKit.TryPulse();
-		else
-		{
-			var flat = away;
-			flat.Y = 0f;
-			if (flat.LengthSquared() < 0.01f)
-				flat = -body.GlobalTransform.Basis.Z;
-			body.Velocity += flat.Normalized() * 6f + Vector3.Up * 3f;
-		}
+			pulsed = body.jumpKit.TryPulse(JumpVerb.Dash, flat);
+
+		if (!pulsed)
+			body.Velocity += flat * 6f + Vector3.Up * 3f;
+
 		Note(NpcReflexKind.NadeLeap);
 		return true;
 	}

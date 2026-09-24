@@ -1,6 +1,6 @@
 # AI behavior
 
-Engine today: `Scripts/Entity/NpcAI/` — Dummy (packets work), Soldier (band hook only), empty Valkarie / SF stubs. Brain stubs under `Brain/`.
+Engine today: `Scripts/Entity/NpcAI/` — Dummy (packets work), Soldier (band hook + NpcBrain walk), empty Valkarie / SF stubs. Brain under `Brain/`.
 
 Same kits as players. Same packets, Status, `TryPulse`. No `if (titan)` in Resolve. No AI-only damage.
 
@@ -23,8 +23,8 @@ RoleDef reshapes range and idle. Scout close. Sniper height. Soldier mid.
 ## Implement order
 
 0. Dummy packets.
-1. Soldier + NpcBrain walk + last-known + AimHitscanTrack / AimLeadFlat (`22`).
-2. Reflex nade-leap, log after.
+1. Soldier + NpcBrain walk + last-known + AimHitscanTrack / AimLeadFlat (`22`). **LAND 2026-09-24:** SoldierPawn composes NpcBrain child with default soldier RoleDef; sense fills LastKnown from AssignedTarget export; EQS-lite behind-ray sets WorldHazardAhead so BackUp → GetOutOfView; Reflex.TryNadeLeap calls real JumpKit.TryPulse(Dash, away) then notes after fire. UseMeshConsensus remains false. No Valkarie tree.
+2. Reflex nade-leap, log after. (done in 1)
 3. HoldBand + range switch.
 4. Terrified / Enraged.
 5. Cover + BackOutOfView.

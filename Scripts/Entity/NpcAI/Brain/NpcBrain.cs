@@ -10,6 +10,8 @@ public partial class NpcBrain : Node
 {
 	[Export] public NpcRoleDef Role;
 	[Export] public bool UseMeshConsensus;
+	[Export] public Node3D AssignedTarget;
+	[Export] public float HazardRayMeters = 3.5f;
 
 	public NpcReflex Reflex { get; } = new();
 	public NpcVerb ActiveVerb { get; private set; }
@@ -20,7 +22,12 @@ public partial class NpcBrain : Node
 	public override void _Ready()
 	{
 		_body = GetParent() as ActorEntity;
-		Role ??= new NpcRoleDef();
+		Role ??= new NpcRoleDef
+		{
+			RoleId = "soldier",
+			DefaultVerb = NpcVerb.MoveAndAttack,
+			PreferredRange = 18f
+		};
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -36,10 +43,38 @@ public partial class NpcBrain : Node
 	void TickSense()
 	{
 		Sense.SuggestedMacro = UseMeshConsensus ? Sense.SuggestedMacro : NpcMacroIntent.None;
+
 		if (_body.health?.State != null)
 		{
 			var hp = _body.health.State.HpOf(Hypersteel.Health.BodySegment.Torso);
 			Sense.OccupantHp01 = Mathf.Clamp(hp / 100f, 0f, 1f);
+		}
+
+		// Last-known from assigned Node3D export (overlap / vision later)
+		if (AssignedTarget != null && GodotObject.IsInstanceValid(AssignedTarget))
+		{
+			Sense.LastKnownTarget = AssignedTarget.GlobalPosition;
+			Sense.HasLastKnown = true;
+		}
+
+		// EQS lite: single ray behind the pawn. BackUp rewrites to GetOutOfView on hit.
+		Sense.WorldHazardAhead = false;
+		var space = _body.GetWorld3D()?.DirectSpaceState;
+		if (space != null)
+		{
+			var origin = _body.GlobalPosition + Vector3.Up * 0.9f;
+			// Godot look is -Z; behind is +Z
+			var behind = _body.GlobalTransform.Basis.Z * HazardRayMeters;
+			var q = PhysicsRayQueryParameters3D.Create(origin, origin + behind);
+			q.CollideWithAreas = false;
+			q.CollideWithBodies = true;
+			q.Exclude = new Godot.Collections.Array<Rid> { _body.GetRid() };
+			var hit = space.IntersectRay(q);
+			if (hit.Count > 0)
+			{
+				Sense.WorldHazardAhead = true;
+				Sense.WorldHazardPoint = (Vector3)hit["position"];
+			}
 		}
 	}
 
