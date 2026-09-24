@@ -1,60 +1,61 @@
 # Hypersteel project board
 
-Twin of the `hypersteel-project-manage` skill. Status only. Design stays in the other docs/*.md files.
+Twin of the `hypersteel-project-manage` skill. Status only.
 Repo `sera5m/hypersteel_godot`.
 
 Tokens — done | almost | tweaks | wip | 35% | tbd | not started
 
 ## Movement — almost
-https://github.com/sera5m/hypersteel_godot/tree/main/Scripts
-https://github.com/sera5m/hypersteel_godot/tree/main/Scripts/Abilities/Kits/JumpKit
-Interacts with — Entity motor slot, FSM, JumpKit. Depends on — CharacterBody3D, first-party Jolt.
-- Source ground/air almost
-- Sauce Resource done
-- PlayerMovement partials done
-- FSM verbs done as impulses
-- JumpKit box + IMoveMotor + compose flag wip
-- PlayerMovement does not yet honor GravityScale / skip Source during dash lock
+- Source ground/air almost | sauce done | PlayerMovement partials done
+- FSM slide/vault/wallrun/ladder done as impulses
+- JumpKit + WallRun + Slide boxes almost
+- PlayerMovement does not honor GravityScale / skip Source during dash lock
 - In-game tune tweaks
 
 ## Damage / Health — almost
-https://github.com/sera5m/hypersteel_godot/tree/main/Scripts/Damage
-https://github.com/sera5m/hypersteel_godot/tree/main/Scripts/Health
-Interacts with — Entity, Status, Feelings, future weapons.
-- Limbs done | Types/packet/AP done | Status tweaks | Composition done
-- ArmorPiece + DamageReceive almost | HurtBox scenes tbd | Dummy done | Flavor text tbd
+- Limbs / packet / AP done | plate soak almost | HurtBox scenes tbd
+- Dummy done | Status tags almost | DoT/heat tweaks
+- Packet now carries ApplyStatus from gun kit
 
 ## Entity — almost
-https://github.com/sera5m/hypersteel_godot/tree/main/Scripts/Entity
-- ActorEntity door done | KitComposer done | pawn stubs done
-- Dummy receives through armor done
+- ActorEntity + KitComposer done
+- EntityStats on every actor (Mass, LiftKg, Strength, Agi…) done
+- Ryko 600 kg lift / 220 loaded; Enduring 1000 kg lift stub
+- Throw = mass ≤ 50% of lift left after hold
 - Player scene still PlayerMovement root — wip
-- jumpKit slot on ActorEntity wip
+- PawnActions + OperatorInput exist; not dropped on the parkour scene
 
-## Status / feelings — tweaks
-https://github.com/sera5m/hypersteel_godot/tree/main/Scripts/Damage
-- Tags almost | Flinch almost | DoT/heat tweaks | Morale not started
-
-## UI — unfinished, 35%
-https://github.com/sera5m/hypersteel_godot/tree/main/Scripts
-- SP HUD — debug labels only
-- MP HUD — not started
-- Damage/limb UI — not started
-
-## Weapons — not started
-Add `Scripts/Weapons/` when begun. Depends on Damage door.
+## Weapons — wip
+Was "not started". Now:
+- Gun + SightDef + Attach slots + GunKit handling vs Strength done
+- TestRifle cheat fire/reload/alt done
+- Hands law 24: LMB fire, RMB alt, MMB ADS hold/toggle, E context
+- Catalog mags/stocks/muzzles per ammo family done
+- Named roster guns (Kar8, ISL, Volcano…) not actors
+- Recoil into SourceMove tbd | inspect UI tbd | project.godot action map tbd
 
 ## AI — wip
-https://github.com/sera5m/hypersteel_godot/tree/main/Scripts/Entity/NpcAI
-- Soldier Critical stub done | Dummy done | roster law done (`design notes/21-enemy-roster.md`)
-- NpcBrain four-clock + SoldierPawn compose + sense/EQS-lite/reflex LAND 2026-09-24 (walk, AssignedTarget last-known, behind-ray, Dash nade-leap)
-- Next: HoldBand, range, aim leaves, scout RoleDef
-- Valkarie / morale not started
+- NpcBrain four-clock + Soldier + sense/cover/reflex LAND
+- Fire / reload / ADS-at-far go through PawnActions
+- Turn tax uses EntityStats.LiveTurnRate(gun.TurnSlowdown)
+- Mesh consensus off | bounce-guess stub | Valkarie not started
 
-## Audio / VFX — wip
-Legacy player audio/particles exist. Damage impact sounds tbd.
+## Status / feelings — tweaks
+- Tags almost | Flinch almost | ApplyStatus on packet not consumed by StatusComponent yet
+
+## Weather — almost (code tree)
+- WeatherManager + bake wind map + planet presets on repo
+- Particles / per-level volumes still art
+
+## Mechs — design only
+- 07-mech fused chassis + cores + pods. No walker pawn.
+
+## UI — 35%
+- Debug speed labels only
+
+## Audio / VFX — wip (legacy player)
 
 ## Net — not started
 
 ## Focus
-Put an ArmorPiece collider on Dummy in a scene and fire `DamageProbe.TryHurt`. Then weapons. Do not grow PlayerMovement.cs.
+Drop OperatorInput + PawnActions + Gun on a scene that is ActorEntity. Consume ApplyStatus in StatusComponent. Do not grow PlayerMovement.cs.
