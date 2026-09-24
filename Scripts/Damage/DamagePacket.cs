@@ -73,8 +73,7 @@ public struct DamagePacket
 	public Node3D Instigator;
 	public bool FromCover;
 	public Node3D Cover;
-
-	/// <summary>Null unless the recipient set WantCoverLog. Do not allocate on the hot path.</summary>
+	public StatusTag ApplyStatus;
 	public List<CoverReduction> CoverLog;
 
 	public void RecordCover(Node3D actor, float reduced, float through, BodySegment mount)

@@ -1,5 +1,6 @@
 using Godot;
 using Hypersteel.Damage;
+using Hypersteel.Entity;
 
 namespace Hypersteel.Weapons;
 
@@ -27,6 +28,7 @@ public partial class TestRifle : Gun
 		InMag = MagSize;
 		_owner = GetParent() as Node3D;
 		Use ??= new GunUseHint { RangeFit = GunRangeFit.Mid, BestMeters = 18f, OkMeters = 55f, WantsAdsAtFar = true };
+		Kit.Recompute(BaseHandling);
 	}
 
 	public override void _Process(double delta)
@@ -48,7 +50,8 @@ public partial class TestRifle : Gun
 	{
 		if (Reloading || InMag >= MagSize || Reserve <= 0) return false;
 		Reloading = true;
-		_reloadLeft = ReloadFor(ReloadTime, 1f, 1f);
+		var st = (_owner as ActorEntity)?.Stats;
+		_reloadLeft = st != null ? ReloadFor(ReloadTime, st.Agility, st.UseTime) : ReloadTime;
 		return true;
 	}
 
@@ -67,8 +70,27 @@ public partial class TestRifle : Gun
 		var packet = DamagePacket.KineticHit(Kinetic * kineticMul, Ap + Kit.ApAdd);
 		packet.Name = "test-rifle";
 		packet.Instigator = _owner;
+		ApplyKitStatus(ref packet);
 		var exclude = _owner is CollisionObject3D body ? body.GetRid() : default;
-		DamageCast.Ray(this, from, dir, Range * Kit.Vel, packet, exclude);
+		DamageCast.Ray(this, from, dir, Range * Mathf.Max(0.2f, Kit.Vel), packet, exclude);
 		return true;
+	}
+
+	void ApplyKitStatus(ref DamagePacket packet)
+	{
+		foreach (var a in Kit.Slots.Values)
+		{
+			if (string.IsNullOrEmpty(a.ExtraStatus)) continue;
+			switch (a.ExtraStatus)
+			{
+				case "Heat":
+					packet.ApplyStatus |= StatusTag.Hot;
+					packet.KineticFlags |= KineticFlags.Incendiary;
+					break;
+				case "Shock":
+					packet.ApplyStatus |= StatusTag.Zapped;
+					break;
+			}
+		}
 	}
 }
