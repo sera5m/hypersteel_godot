@@ -1,5 +1,4 @@
 using Godot;
-using Hypersteel.Damage;
 
 namespace Hypersteel.Entity.NpcAI.Brain;
 
@@ -13,7 +12,7 @@ public partial class NpcBrain : Node
 	[Export] public bool UseMeshConsensus;
 	[Export] public Node3D AssignedTarget;
 	[Export] public float HazardRayMeters = 3.5f;
-	[Export] public float RollMinTaken = 8f;
+	[Export] public float CoverSampleMeters = 5f;
 
 	public NpcReflex Reflex { get; } = new();
 	public NpcVision Vision { get; } = new();
@@ -33,10 +32,6 @@ public partial class NpcBrain : Node
 		Stats ??= new NpcStats();
 		Loadout.Bind(_body);
 		if (_body != null) _body.AddToGroup("npc_squad");
-		if (_body?.health != null)
-			_body.health.Damaged += OnDamaged;
-		if (_body?.feelings != null)
-			_body.feelings.Flinch += OnFlinch;
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -58,26 +53,6 @@ public partial class NpcBrain : Node
 		ActiveVerb = NpcMacroMicro.Rewrite(asked, Sense, _body);
 		NpcExecution.Step(_body, Role, ActiveVerb, Sense, dt);
 		TryShoot();
-	}
-
-	void OnDamaged(float taken, int segment)
-	{
-		if (taken < RollMinTaken) return;
-		RollAway();
-	}
-
-	void OnFlinch(float intensity)
-	{
-		if (intensity < 0.35f) return;
-		RollAway();
-	}
-
-	void RollAway()
-	{
-		if (_body == null) return;
-		Actions.Cancel();
-		var from = Sense.HasLastKnown ? Sense.LastKnownTarget : _body.GlobalPosition + _body.GlobalTransform.Basis.Z;
-		Reflex.TryHitRoll(_body, from);
 	}
 
 	void TickSense()
@@ -106,6 +81,7 @@ public partial class NpcBrain : Node
 		}
 
 		Sense.WorldHazardAhead = false;
+		Sense.HasCover = false;
 		var space = _body.GetWorld3D()?.DirectSpaceState;
 		if (space == null) return;
 		var origin = _body.GlobalPosition + Vector3.Up * 0.9f;
@@ -117,6 +93,47 @@ public partial class NpcBrain : Node
 		{
 			Sense.WorldHazardAhead = true;
 			Sense.WorldHazardPoint = (Vector3)hit["position"];
+		}
+
+		// Cover EQS-lite: 8 dirs, prefer first/closest point that is reachable and blocks LOS to last-known.
+		if (Sense.HasLastKnown)
+		{
+			var toT = Sense.LastKnownTarget - _body.GlobalPosition;
+			toT.Y = 0f;
+			var baseDir = toT.LengthSquared() > 0.1f ? toT.Normalized() : -_body.GlobalTransform.Basis.Z;
+			float best = float.MaxValue;
+			Vector3 bestPt = Vector3.Zero;
+			bool found = false;
+			for (int i = 0; i < 8; i++)
+			{
+				var ang = i * Mathf.Tau / 8f;
+				var dir = baseDir.Rotated(Vector3.Up, ang);
+				var candidate = _body.GlobalPosition + dir * CoverSampleMeters;
+				var candUp = candidate + Vector3.Up * 0.9f;
+
+				// clear path to cover candidate?
+				var q1 = PhysicsRayQueryParameters3D.Create(origin, candUp);
+				q1.Exclude = new Godot.Collections.Array<Rid> { _body.GetRid() };
+				if (space.IntersectRay(q1).Count > 0) continue;
+
+				// from candidate, LOS to target blocked = cover
+				var q2 = PhysicsRayQueryParameters3D.Create(candUp, Sense.LastKnownTarget + Vector3.Up * 1f);
+				q2.Exclude = new Godot.Collections.Array<Rid> { _body.GetRid() };
+				if (space.IntersectRay(q2).Count == 0) continue;
+
+				var d = _body.GlobalPosition.DistanceTo(candidate);
+				if (d < best)
+				{
+					best = d;
+					bestPt = candidate;
+					found = true;
+				}
+			}
+			if (found)
+			{
+				Sense.HasCover = true;
+				Sense.CoverPoint = bestPt;
+			}
 		}
 	}
 

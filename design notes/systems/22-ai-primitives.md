@@ -70,9 +70,9 @@ Off unless TeamComms module on. Rank int: higher obeys. Same rank: role-weighted
 
 ## Build order
 
-1. Soldier walk + last-known + AimHitscanTrack / AimLeadFlat.
-2. HoldBand + range switch.
-3. Terrified / Enraged hooks.
-4. Cover + BackOutOfView.
+1. [x] Soldier walk + last-known + AimHitscanTrack / AimLeadFlat.
+2. [x] HoldBand + range switch.
+3. [x] Terrified / Enraged hooks.
+4. [x] Cover + BackOutOfView.  (Cover EQS-lite landed 2026-09-24; BackOutOfView via GetOutOfView + hazard rewrite)
 5. TeamComms + rank.
 6. Traps / bounce / accel lead.

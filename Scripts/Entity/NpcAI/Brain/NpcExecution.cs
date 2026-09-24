@@ -21,6 +21,15 @@ public static class NpcExecution
 			case NpcVerb.GoLook:
 			case NpcVerb.MoveAndAttack:
 			case NpcVerb.Enclose:
+				if (sense.HasCover)
+				{
+					var dCover = body.GlobalPosition.DistanceTo(sense.CoverPoint);
+					if (dCover > 1.5f)
+					{
+						wish = sense.CoverPoint - body.GlobalPosition;
+						break;
+					}
+				}
 				if (sense.HasLastKnown)
 					wish = sense.LastKnownTarget - body.GlobalPosition;
 				break;
