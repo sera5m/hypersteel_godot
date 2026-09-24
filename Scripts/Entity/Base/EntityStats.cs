@@ -3,13 +3,16 @@ using Godot;
 namespace Hypersteel.Entity;
 
 /// <summary>
-/// MP operator sheet. Every ActorEntity has one. AI does not get a second table.
-/// Meat baseline in MP is already +cyber; raw meat is ~20% under.
+/// Strength = combat scalar (recoil, melee, turn tax).
+/// LiftKg = two-hand pick cap. Not the same number.
+/// One hand = current mass + half of (LiftKg - mass).
 /// </summary>
 [GlobalClass]
 public partial class EntityStats : Resource
 {
 	[Export] public float Mass = 80f;
+	[Export] public float MassBare = 80f;
+	[Export] public float LiftKg = 120f;
 	[Export] public float Agility = 1f;
 	[Export] public float Speed = 1f;
 	[Export] public float Stamina = 1f;
@@ -38,4 +41,16 @@ public partial class EntityStats : Resource
 
 	public float LiveTurnRate(float gunSlowdown01) =>
 		TurnRateDeg * (1f - Mathf.Clamp(gunSlowdown01, 0f, 0.5f));
+
+	public float TwoHandLift => LiftKg;
+
+	public float OneHandLift(float currentMass)
+	{
+		var m = Mathf.Max(0f, currentMass);
+		var rem = Mathf.Max(0f, LiftKg - m);
+		return m + rem * 0.5f;
+	}
+
+	public bool CanTwoHand(float kg) => kg <= LiftKg + 0.01f;
+	public bool CanOneHand(float kg, float currentMass) => kg <= OneHandLift(currentMass) + 0.01f;
 }
