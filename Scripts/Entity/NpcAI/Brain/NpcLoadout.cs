@@ -10,7 +10,6 @@ public enum NpcGunSlot
 	Heavy,
 }
 
-/// <summary>Three slots. Active gun is what TryShoot pulls. Not a second inventory.</summary>
 public sealed class NpcLoadout
 {
 	public TestRifle Primary;
@@ -40,9 +39,32 @@ public sealed class NpcLoadout
 
 	public void PickSlot(float distance, float close, float far, bool targetIsHull)
 	{
-		if (targetIsHull && Heavy != null) { Slot = NpcGunSlot.Heavy; return; }
-		if (distance <= close && Sidearm != null) { Slot = NpcGunSlot.Sidearm; return; }
-		if (distance >= far && Heavy != null) { Slot = NpcGunSlot.Heavy; return; }
-		Slot = NpcGunSlot.Primary;
+		var soft = !targetIsHull;
+		var many = false;
+		var best = NpcGunSlot.Primary;
+		var bestS = Score(Primary, distance, soft, many);
+
+		var side = Score(Sidearm, distance, soft, many);
+		if (side > bestS) { bestS = side; best = NpcGunSlot.Sidearm; }
+
+		var heavy = Score(Heavy, distance, soft, many);
+		if (heavy > bestS) { best = NpcGunSlot.Heavy; }
+
+		if (bestS < -0.5f)
+		{
+			if (targetIsHull && Heavy != null) best = NpcGunSlot.Heavy;
+			else if (distance <= close && Sidearm != null) best = NpcGunSlot.Sidearm;
+			else if (distance >= far && Heavy != null) best = NpcGunSlot.Heavy;
+			else best = NpcGunSlot.Primary;
+		}
+
+		Slot = best;
+	}
+
+	static float Score(TestRifle gun, float dist, bool soft, bool many)
+	{
+		if (gun == null || !gun.CheckAmmo() && !gun.Reloading) return float.NegativeInfinity;
+		if (gun.Use == null) return 0f;
+		return gun.Use.Score(dist, soft, many, gun.Ads);
 	}
 }
