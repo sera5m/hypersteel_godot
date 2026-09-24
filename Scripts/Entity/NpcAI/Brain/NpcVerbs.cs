@@ -14,7 +14,6 @@ public enum NpcVerb
 	PulseKit,
 }
 
-/// <summary>Coarse team intent. Independent roles ignore this until mesh exists.</summary>
 public enum NpcMacroIntent
 {
 	None = 0,
@@ -30,9 +29,9 @@ public enum NpcReflexKind
 	NadeLeap,
 	Dodge,
 	Counter,
+	Roll,
 }
 
-/// <summary>One-tick sense. Morale is not Health.</summary>
 public struct NpcSenseSnapshot
 {
 	public float OccupantHp01;
