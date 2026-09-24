@@ -18,6 +18,7 @@ public partial class NpcBrain : Node
 	public NpcMorale Morale { get; } = new();
 	public NpcActionRunner Actions { get; } = new();
 	public NpcTeamComms Comms { get; } = new();
+	public NpcLoadout Loadout { get; } = new();
 	public NpcVerb ActiveVerb { get; private set; }
 	public NpcSenseSnapshot Sense;
 
@@ -28,6 +29,8 @@ public partial class NpcBrain : Node
 		_body = GetParent() as ActorEntity;
 		Role ??= new NpcRoleDef { RoleId = "soldier", DefaultVerb = NpcVerb.MoveAndAttack, PreferredRange = 18f };
 		Stats ??= new NpcStats();
+		Loadout.Bind(_body);
+		if (_body != null) _body.AddToGroup("npc_squad");
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -45,8 +48,10 @@ public partial class NpcBrain : Node
 		asked = Reshape(asked);
 		asked = ApplyMorale(asked);
 		asked = HoldBand(asked);
+		asked = HelpDying(asked);
 		ActiveVerb = NpcMacroMicro.Rewrite(asked, Sense, _body);
 		NpcExecution.Step(_body, Role, ActiveVerb, Sense, dt);
+		TryShoot();
 	}
 
 	void TickSense()
@@ -67,6 +72,7 @@ public partial class NpcBrain : Node
 			Sense.LastKnownTarget = p;
 			Sense.HasLastKnown = true;
 			Vision.LastKnown = p;
+			Loadout.Gun?.SelectTarget(AssignedTarget);
 			var look = -_body.GlobalTransform.Basis.Z;
 			var to = p - _body.GlobalPosition;
 			var cone = Stats != null ? Stats.VisionConeDeg : 110f;
@@ -120,6 +126,31 @@ public partial class NpcBrain : Node
 		if (d < Role.CloseRange) return NpcVerb.BackUp;
 		if (d > Role.FarRange) return NpcVerb.MoveAndAttack;
 		return verb;
+	}
+
+	NpcVerb HelpDying(NpcVerb verb)
+	{
+		if (Role == null || !Role.HasTeamComms) return verb;
+		if (Morale.State == NpcMoraleState.Terrified) return verb;
+		var ally = Comms.DyingAlly();
+		if (ally == null) return verb;
+		Sense.LastKnownTarget = ally.GlobalPosition;
+		Sense.HasLastKnown = true;
+		return NpcVerb.MoveAndAttack;
+	}
+
+	void TryShoot()
+	{
+		var gun = Loadout.Gun;
+		if (gun == null || ActiveVerb != NpcVerb.MoveAndAttack) return;
+		if (Loadout.NeedsReload) { gun.Reload(); return; }
+		if (!Sense.HasLastKnown) return;
+
+		var aim = Sense.LastKnownTarget;
+		if (AimLead.Flat(_body.GlobalPosition, Sense.LastKnownTarget, Vision.LastVel, gun.Muzzle, out var lead, out _))
+			aim = lead;
+		if (!CanAttackAim(aim)) return;
+		gun.PrimaryFire(aim);
 	}
 
 	public bool CanAttackAim(Vector3 aimPoint)
