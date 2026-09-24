@@ -1,10 +1,8 @@
 using Godot;
+using Hypersteel.Damage;
 
 namespace Hypersteel.Entity.NpcAI.Brain;
 
-/// <summary>
-/// One brain, four clocks. Mesh off. RoleDef rules run alone.
-/// </summary>
 public partial class NpcBrain : Node
 {
 	[Export] public NpcRoleDef Role;
@@ -13,6 +11,7 @@ public partial class NpcBrain : Node
 	[Export] public Node3D AssignedTarget;
 	[Export] public float HazardRayMeters = 3.5f;
 	[Export] public float CoverSampleMeters = 5f;
+	[Export] public float RollMinTaken = 8f;
 
 	public NpcReflex Reflex { get; } = new();
 	public NpcVision Vision { get; } = new();
@@ -32,6 +31,8 @@ public partial class NpcBrain : Node
 		Stats ??= new NpcStats();
 		Loadout.Bind(_body);
 		if (_body != null) _body.AddToGroup("npc_squad");
+		if (_body?.health != null) _body.health.Damaged += OnDamaged;
+		if (_body?.feelings != null) _body.feelings.Flinch += OnFlinch;
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -50,21 +51,40 @@ public partial class NpcBrain : Node
 		asked = ApplyMorale(asked);
 		asked = HoldBand(asked);
 		asked = HelpDying(asked);
+		asked = SeekWorld(asked);
 		ActiveVerb = NpcMacroMicro.Rewrite(asked, Sense, _body);
 		NpcExecution.Step(_body, Role, ActiveVerb, Sense, dt);
 		TryShoot();
 	}
 
+	void OnDamaged(float taken, int segment)
+	{
+		if (taken < RollMinTaken) return;
+		RollAway();
+	}
+
+	void OnFlinch(float intensity)
+	{
+		if (intensity < 0.35f) return;
+		RollAway();
+	}
+
+	void RollAway()
+	{
+		if (_body == null) return;
+		Actions.Cancel();
+		var from = Sense.HasLastKnown ? Sense.LastKnownTarget : _body.GlobalPosition + _body.GlobalTransform.Basis.Z;
+		Reflex.TryHitRoll(_body, from);
+	}
+
 	void TickSense()
 	{
 		Sense.SuggestedMacro = UseMeshConsensus ? Sense.SuggestedMacro : NpcMacroIntent.None;
-
 		if (_body.health?.State != null)
 		{
 			var hp = _body.health.State.HpOf(Hypersteel.Health.BodySegment.Torso);
 			Sense.OccupantHp01 = Mathf.Clamp(hp / 100f, 0f, 1f);
 		}
-
 		if (AssignedTarget != null && GodotObject.IsInstanceValid(AssignedTarget))
 		{
 			var p = AssignedTarget.GlobalPosition;
@@ -75,74 +95,15 @@ public partial class NpcBrain : Node
 			Vision.LastKnown = p;
 			Loadout.Gun?.SelectTarget(AssignedTarget);
 			var look = -_body.GlobalTransform.Basis.Z;
-			var to = p - _body.GlobalPosition;
-			var cone = Stats != null ? Stats.VisionConeDeg : 110f;
-			if (NpcVision.InCone(look, to, cone)) Vision.NotifySeen(Stats);
-		}
-
-		Sense.WorldHazardAhead = false;
-		Sense.HasCover = false;
-		var space = _body.GetWorld3D()?.DirectSpaceState;
-		if (space == null) return;
-		var origin = _body.GlobalPosition + Vector3.Up * 0.9f;
-		var behind = _body.GlobalTransform.Basis.Z * HazardRayMeters;
-		var q = PhysicsRayQueryParameters3D.Create(origin, origin + behind);
-		q.Exclude = new Godot.Collections.Array<Rid> { _body.GetRid() };
-		var hit = space.IntersectRay(q);
-		if (hit.Count > 0)
-		{
-			Sense.WorldHazardAhead = true;
-			Sense.WorldHazardPoint = (Vector3)hit["position"];
-		}
-
-		// Cover EQS-lite: 8 dirs, prefer first/closest point that is reachable and blocks LOS to last-known.
-		if (Sense.HasLastKnown)
-		{
-			var toT = Sense.LastKnownTarget - _body.GlobalPosition;
-			toT.Y = 0f;
-			var baseDir = toT.LengthSquared() > 0.1f ? toT.Normalized() : -_body.GlobalTransform.Basis.Z;
-			float best = float.MaxValue;
-			Vector3 bestPt = Vector3.Zero;
-			bool found = false;
-			for (int i = 0; i < 8; i++)
-			{
-				var ang = i * Mathf.Tau / 8f;
-				var dir = baseDir.Rotated(Vector3.Up, ang);
-				var candidate = _body.GlobalPosition + dir * CoverSampleMeters;
-				var candUp = candidate + Vector3.Up * 0.9f;
-
-				// clear path to cover candidate?
-				var q1 = PhysicsRayQueryParameters3D.Create(origin, candUp);
-				q1.Exclude = new Godot.Collections.Array<Rid> { _body.GetRid() };
-				if (space.IntersectRay(q1).Count > 0) continue;
-
-				// from candidate, LOS to target blocked = cover
-				var q2 = PhysicsRayQueryParameters3D.Create(candUp, Sense.LastKnownTarget + Vector3.Up * 1f);
-				q2.Exclude = new Godot.Collections.Array<Rid> { _body.GetRid() };
-				if (space.IntersectRay(q2).Count == 0) continue;
-
-				var d = _body.GlobalPosition.DistanceTo(candidate);
-				if (d < best)
-				{
-					best = d;
-					bestPt = candidate;
-					found = true;
-				}
-			}
-			if (found)
-			{
-				Sense.HasCover = true;
-				Sense.CoverPoint = bestPt;
-			}
+			if (NpcVision.InCone(look, p - _body.GlobalPosition, Stats != null ? Stats.VisionConeDeg : 110f))
+				Vision.NotifySeen(Stats);
 		}
 	}
 
-	NpcVerb PickMacro()
-	{
-		if (UseMeshConsensus && Sense.SuggestedMacro == NpcMacroIntent.Enclose)
-			return NpcVerb.Enclose;
-		return Role != null ? Role.DefaultVerb : NpcVerb.MoveAndAttack;
-	}
+	NpcVerb PickMacro() =>
+		UseMeshConsensus && Sense.SuggestedMacro == NpcMacroIntent.Enclose
+			? NpcVerb.Enclose
+			: Role != null ? Role.DefaultVerb : NpcVerb.MoveAndAttack;
 
 	NpcVerb Reshape(NpcVerb verb)
 	{
@@ -152,29 +113,24 @@ public partial class NpcBrain : Node
 		return verb;
 	}
 
-	NpcVerb ApplyMorale(NpcVerb verb)
+	NpcVerb ApplyMorale(NpcVerb verb) => Morale.State switch
 	{
-		return Morale.State switch
-		{
-			NpcMoraleState.Terrified => NpcVerb.GetOutOfView,
-			NpcMoraleState.Enraged => NpcVerb.MoveAndAttack,
-			_ => verb
-		};
-	}
+		NpcMoraleState.Terrified => NpcVerb.GetOutOfView,
+		NpcMoraleState.Enraged => NpcVerb.MoveAndAttack,
+		_ => verb
+	};
 
 	NpcVerb HoldBand(NpcVerb verb)
 	{
 		if (!Sense.HasLastKnown || Role == null || _body == null) return verb;
 		var d = _body.GlobalPosition.DistanceTo(Sense.LastKnownTarget);
 		if (d < Role.CloseRange) return NpcVerb.BackUp;
-		if (d > Role.FarRange) return NpcVerb.MoveAndAttack;
 		return verb;
 	}
 
 	NpcVerb HelpDying(NpcVerb verb)
 	{
-		if (Role == null || !Role.HasTeamComms) return verb;
-		if (Morale.State == NpcMoraleState.Terrified) return verb;
+		if (Role == null || !Role.HasTeamComms || Morale.State == NpcMoraleState.Terrified) return verb;
 		var ally = Comms.DyingAlly();
 		if (ally == null) return verb;
 		Sense.LastKnownTarget = ally.GlobalPosition;
@@ -182,13 +138,30 @@ public partial class NpcBrain : Node
 		return NpcVerb.MoveAndAttack;
 	}
 
+	NpcVerb SeekWorld(NpcVerb verb)
+	{
+		if (_body == null) return verb;
+		if (Sense.OccupantHp01 > 0f && Sense.OccupantHp01 < 0.4f)
+		{
+			var kit = NpcWorldUse.Nearest(_body, NpcWorldKind.Health);
+			if (kit != null) { Sense.LastKnownTarget = kit.GlobalPosition; Sense.HasLastKnown = true; return NpcVerb.MoveAndAttack; }
+		}
+		if (Loadout.Gun != null && !Loadout.Gun.CheckAmmo())
+		{
+			var ammo = NpcWorldUse.Nearest(_body, NpcWorldKind.Ammo);
+			if (ammo != null) { Sense.LastKnownTarget = ammo.GlobalPosition; Sense.HasLastKnown = true; return NpcVerb.MoveAndAttack; }
+		}
+		return verb;
+	}
+
 	void TryShoot()
 	{
+		if (Sense.HasLastKnown && Role != null && _body != null)
+			Loadout.PickSlot(_body.GlobalPosition.DistanceTo(Sense.LastKnownTarget), Role.CloseRange, Role.FarRange, false);
 		var gun = Loadout.Gun;
 		if (gun == null || ActiveVerb != NpcVerb.MoveAndAttack) return;
 		if (Loadout.NeedsReload) { gun.Reload(); return; }
 		if (!Sense.HasLastKnown) return;
-
 		var aim = Sense.LastKnownTarget;
 		if (AimLead.Flat(_body.GlobalPosition, Sense.LastKnownTarget, Vision.LastVel, gun.Muzzle, out var lead, out _))
 			aim = lead;
