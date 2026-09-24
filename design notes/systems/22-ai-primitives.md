@@ -73,6 +73,6 @@ Off unless TeamComms module on. Rank int: higher obeys. Same rank: role-weighted
 1. [x] Soldier walk + last-known + AimHitscanTrack / AimLeadFlat.
 2. [x] HoldBand + range switch.
 3. [x] Terrified / Enraged hooks.
-4. [x] Cover + BackOutOfView.  (Cover EQS-lite landed 2026-09-24; BackOutOfView via GetOutOfView + hazard rewrite)
+4. [x] Cover + BackOutOfView.  (Cover EQS-lite + forward hazard ray in TickSense 2026-09-24; BackOutOfView via GetOutOfView + hazard rewrite)
 5. TeamComms + rank.
 6. Traps / bounce / accel lead.

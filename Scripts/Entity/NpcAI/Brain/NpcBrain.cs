@@ -80,11 +80,15 @@ public partial class NpcBrain : Node
 	void TickSense()
 	{
 		Sense.SuggestedMacro = UseMeshConsensus ? Sense.SuggestedMacro : NpcMacroIntent.None;
+		Sense.WorldHazardAhead = false;
+		Sense.HasCover = false;
+
 		if (_body.health?.State != null)
 		{
 			var hp = _body.health.State.HpOf(Hypersteel.Health.BodySegment.Torso);
 			Sense.OccupantHp01 = Mathf.Clamp(hp / 100f, 0f, 1f);
 		}
+
 		if (AssignedTarget != null && GodotObject.IsInstanceValid(AssignedTarget))
 		{
 			var p = AssignedTarget.GlobalPosition;
@@ -97,6 +101,71 @@ public partial class NpcBrain : Node
 			var look = -_body.GlobalTransform.Basis.Z;
 			if (NpcVision.InCone(look, p - _body.GlobalPosition, Stats != null ? Stats.VisionConeDeg : 110f))
 				Vision.NotifySeen(Stats);
+		}
+
+		SampleHazardAndCover();
+	}
+
+	void SampleHazardAndCover()
+	{
+		if (_body == null) return;
+		var space = _body.GetWorld3D()?.DirectSpaceState;
+		if (space == null) return;
+
+		var origin = _body.GlobalPosition + Vector3.Up * 1.2f;
+		var forward = -_body.GlobalTransform.Basis.Z;
+		forward.Y = 0f;
+		if (forward.LengthSquared() < 0.01f) forward = Vector3.Forward;
+		forward = forward.Normalized();
+
+		// Forward hazard (ledge / wall that forces BackUp rewrite)
+		var hazTo = origin + forward * HazardRayMeters;
+		var hazQ = PhysicsRayQueryParameters3D.Create(origin, hazTo);
+		hazQ.CollideWithAreas = false;
+		var hazHit = space.IntersectRay(hazQ);
+		if (hazHit.Count > 0)
+		{
+			Sense.WorldHazardAhead = true;
+			Sense.WorldHazardPoint = (Vector3)hazHit["position"];
+		}
+
+		if (!Sense.HasLastKnown) return;
+
+		// Cover EQS-lite: 8 ring samples; keep if LOS from sample to threat is blocked and self can see sample
+		var threat = Sense.LastKnownTarget + Vector3.Up * 1.2f;
+		var bestD = CoverSampleMeters + 1f;
+		Vector3 best = default;
+		var found = false;
+		const int rings = 8;
+		for (var i = 0; i < rings; i++)
+		{
+			var ang = i * (Mathf.Tau / rings);
+			var dir = new Vector3(Mathf.Cos(ang), 0f, Mathf.Sin(ang));
+			var candidate = origin + dir * CoverSampleMeters;
+
+			// reachable-ish: clear ray self → candidate
+			var reachQ = PhysicsRayQueryParameters3D.Create(origin, candidate);
+			reachQ.CollideWithAreas = false;
+			var reachHit = space.IntersectRay(reachQ);
+			if (reachHit.Count > 0) continue;
+
+			// cover: LOS candidate → threat blocked
+			var coverQ = PhysicsRayQueryParameters3D.Create(candidate, threat);
+			coverQ.CollideWithAreas = false;
+			var coverHit = space.IntersectRay(coverQ);
+			if (coverHit.Count == 0) continue;
+
+			var d = origin.DistanceTo(candidate);
+			if (d >= bestD) continue;
+			bestD = d;
+			best = candidate;
+			found = true;
+		}
+
+		if (found)
+		{
+			Sense.HasCover = true;
+			Sense.CoverPoint = best;
 		}
 	}
 
