@@ -1,27 +1,36 @@
 using Godot;
 using System.Collections.Generic;
+using Hypersteel.Weapons.Attach;
 
 namespace Hypersteel.Weapons;
 
-/// <summary>World object. Sights mount like Apex. TestRifle inherits this.</summary>
 public partial class Gun : Node3D
 {
 	[Export] public GunUseHint Use;
 	[Export] public bool AcceptsSniperGlass = true;
 	[Export] public bool HasCanted = true;
+	[Export] public GunAmmoFamily Ammo = GunAmmoFamily.Rifle;
+	[Export] public float BaseHandling = 0.30f;
 
 	public SightDef Mounted { get; private set; }
 	public bool CantedLive { get; private set; }
 	public readonly List<SightDef> Bag = new();
+	public readonly GunKit Kit = new();
 
 	public SightDef Live => CantedLive || Mounted == null ? SightDef.Hcog1x() : Mounted;
+
+	public bool MountAttach(GunAttachDef def) => Kit.TryMount(def, Ammo);
+
+	public float TurnSlowdown(float strength) => GunKit.TurnSlowdown(Kit.Handling == 0f ? BaseHandling : Kit.Handling, strength);
+
+	public float ReloadFor(float baseReload, float agility, float useTime) =>
+		GunKit.ReloadSeconds(baseReload, Kit.Reload, agility, useTime);
 
 	public bool Mount(SightDef sight)
 	{
 		if (sight == null) return false;
 		if (sight.SniperOnly && !AcceptsSniperGlass) return false;
-		if (Mounted != null && Mounted.Id != "iron")
-			Bag.Add(Mounted);
+		if (Mounted != null && Mounted.Id != "iron") Bag.Add(Mounted);
 		Mounted = sight;
 		CantedLive = false;
 		return true;
@@ -45,17 +54,17 @@ public partial class Gun : Node3D
 	{
 		if (dist <= close)
 		{
-			if (Mounted != null && !Mounted.IsClose && HasCanted)
-			{
-				SetCanted(true);
-				return true;
-			}
+			if (Mounted != null && !Mounted.IsClose && HasCanted) { SetCanted(true); return true; }
 			var oneX = TakeFromBag(s => s.IsClose);
 			if (oneX != null) return Mount(oneX);
-			if (Mounted != null && Mounted.IsFar) { var stripped = Strip(); if (stripped != null) Bag.Add(stripped); return true; }
+			if (Mounted != null && Mounted.IsFar)
+			{
+				var stripped = Strip();
+				if (stripped != null) Bag.Add(stripped);
+				return true;
+			}
 			return false;
 		}
-
 		if (dist >= far)
 		{
 			SetCanted(false);
@@ -63,7 +72,6 @@ public partial class Gun : Node3D
 			var glass = TakeFromBag(s => s.IsFar || s.ZoomMax >= 3f);
 			return glass != null && Mount(glass);
 		}
-
 		SetCanted(false);
 		return false;
 	}
