@@ -45,6 +45,7 @@ public partial class NpcBrain : Node
 		Morale.Tick(dt);
 		Actions.Tick(dt);
 		TickSense();
+		NpcFanOut.Apply(_body, ref Sense);
 		if (Role != null && Role.HasTeamComms)
 			Comms.Refresh(_body, Stats != null ? Stats.Rank : 0);
 
@@ -86,6 +87,7 @@ public partial class NpcBrain : Node
 		Sense.HasCover = false;
 		Sense.HasStim = false;
 		Sense.HasPortal = false;
+		Sense.HasFanDest = false;
 
 		if (_body.health?.State != null)
 		{
@@ -107,12 +109,9 @@ public partial class NpcBrain : Node
 				Vision.NotifySeen(Stats);
 		}
 
-		// Stim presence for HelpDying / SeekWorld (17-items)
 		var stim = NpcWorldUse.Nearest(_body, NpcWorldKind.Stim, StimSeekRadius);
-		if (stim != null)
-			Sense.HasStim = true;
+		if (stim != null) Sense.HasStim = true;
 
-		// Trap/portal stub: mark nearest nav_portal for later wait / PlaceAtPortal
 		var portal = NpcTrapPortal.NearestPortal(_body, PortalSeekRadius);
 		if (portal != null)
 		{
@@ -135,7 +134,6 @@ public partial class NpcBrain : Node
 		if (forward.LengthSquared() < 0.01f) forward = Vector3.Forward;
 		forward = forward.Normalized();
 
-		// Forward hazard (ledge / wall that forces BackUp rewrite)
 		var hazTo = origin + forward * HazardRayMeters;
 		var hazQ = PhysicsRayQueryParameters3D.Create(origin, hazTo);
 		hazQ.CollideWithAreas = false;
@@ -148,7 +146,6 @@ public partial class NpcBrain : Node
 
 		if (!Sense.HasLastKnown) return;
 
-		// Cover EQS-lite: 8 ring samples; keep if LOS from sample to threat is blocked and self can see sample
 		var threat = Sense.LastKnownTarget + Vector3.Up * 1.2f;
 		var bestD = CoverSampleMeters + 1f;
 		Vector3 best = default;
@@ -159,19 +156,12 @@ public partial class NpcBrain : Node
 			var ang = i * (Mathf.Tau / rings);
 			var dir = new Vector3(Mathf.Cos(ang), 0f, Mathf.Sin(ang));
 			var candidate = origin + dir * CoverSampleMeters;
-
-			// reachable-ish: clear ray self → candidate
 			var reachQ = PhysicsRayQueryParameters3D.Create(origin, candidate);
 			reachQ.CollideWithAreas = false;
-			var reachHit = space.IntersectRay(reachQ);
-			if (reachHit.Count > 0) continue;
-
-			// cover: LOS candidate → threat blocked
+			if (space.IntersectRay(reachQ).Count > 0) continue;
 			var coverQ = PhysicsRayQueryParameters3D.Create(candidate, threat);
 			coverQ.CollideWithAreas = false;
-			var coverHit = space.IntersectRay(coverQ);
-			if (coverHit.Count == 0) continue;
-
+			if (space.IntersectRay(coverQ).Count == 0) continue;
 			var d = origin.DistanceTo(candidate);
 			if (d >= bestD) continue;
 			bestD = d;
@@ -214,14 +204,11 @@ public partial class NpcBrain : Node
 		return verb;
 	}
 
-	/// <summary>TeamComms HelpDying: stim (17) if present, else go to dying ally. Cover already preferred by Execution when HasCover.</summary>
 	NpcVerb HelpDying(NpcVerb verb)
 	{
 		if (Role == null || !Role.HasTeamComms || Morale.State == NpcMoraleState.Terrified) return verb;
 		var ally = Comms.DyingAlly();
 		if (ally == null) return verb;
-
-		// Prefer stim when one is in range (self-stim then cover/ally). Same world_pickup path as 17.
 		if (Sense.HasStim)
 		{
 			var stim = NpcWorldUse.Nearest(_body, NpcWorldKind.Stim, StimSeekRadius);
@@ -232,7 +219,6 @@ public partial class NpcBrain : Node
 				return NpcVerb.MoveAndAttack;
 			}
 		}
-
 		Sense.LastKnownTarget = ally.GlobalPosition;
 		Sense.HasLastKnown = true;
 		return NpcVerb.MoveAndAttack;
@@ -243,7 +229,6 @@ public partial class NpcBrain : Node
 		if (_body == null) return verb;
 		if (Sense.OccupantHp01 > 0f && Sense.OccupantHp01 < 0.4f)
 		{
-			// Stim first (fast crumb), then Health kit
 			if (Sense.HasStim)
 			{
 				var stim = NpcWorldUse.Nearest(_body, NpcWorldKind.Stim, StimSeekRadius);
@@ -292,9 +277,7 @@ public partial class NpcBrain : Node
 		       || NpcVision.TurnTime(look, to, slack, Stats != null ? Stats.TurnRateDeg : 320f) <= (Stats != null ? Stats.PreRotate : 0.2f);
 	}
 
-	/// <summary>Trap portal stub entry. Logs PlaceAtPortal; no munition spawn.</summary>
-	public bool TryPlaceTrap(NpcTrapKind kind) =>
-		NpcTrapPortal.PlaceAtPortal(_body, kind, out _);
+	public bool TryPlaceTrap(NpcTrapKind kind) => NpcTrapPortal.PlaceAtPortal(_body, kind, out _);
 
 	public void IncomingNade(Vector3 from)
 	{
