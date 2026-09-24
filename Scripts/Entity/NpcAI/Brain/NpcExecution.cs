@@ -2,7 +2,6 @@ using Godot;
 
 namespace Hypersteel.Entity.NpcAI.Brain;
 
-/// <summary>Feet only for now. Aim/swing/nade come when guns exist. No hard lock.</summary>
 public static class NpcExecution
 {
 	public static void Step(ActorEntity body, NpcRoleDef role, NpcVerb verb, in NpcSenseSnapshot sense, float dt)
@@ -21,6 +20,11 @@ public static class NpcExecution
 			case NpcVerb.GoLook:
 			case NpcVerb.MoveAndAttack:
 			case NpcVerb.Enclose:
+				if (sense.HasFanDest)
+				{
+					wish = sense.FanDest - body.GlobalPosition;
+					break;
+				}
 				if (sense.HasCover)
 				{
 					var dCover = body.GlobalPosition.DistanceTo(sense.CoverPoint);
@@ -33,10 +37,6 @@ public static class NpcExecution
 				if (sense.HasLastKnown)
 					wish = sense.LastKnownTarget - body.GlobalPosition;
 				break;
-			case NpcVerb.ShootWorld:
-			case NpcVerb.Hold:
-			case NpcVerb.PulseKit:
-			case NpcVerb.None:
 			default:
 				break;
 		}
