@@ -3,10 +3,6 @@ using Hypersteel.Damage;
 
 namespace Hypersteel.Weapons;
 
-/// <summary>
-/// Test gun only. Same DamageCast + packet as a real Type 88 will use.
-/// Inputs: SelectTarget, PrimaryFire, SecondaryFire, Reload, Ads, CheckAmmo.
-/// </summary>
 public partial class TestRifle : Node3D
 {
 	[Export] public int MagSize = 30;
@@ -17,6 +13,7 @@ public partial class TestRifle : Node3D
 	[Export] public float Range = 80f;
 	[Export] public float ReloadTime = 1.6f;
 	[Export] public bool Hitscan = true;
+	[Export] public GunUseHint Use;
 
 	public int InMag { get; private set; }
 	public bool Ads { get; private set; }
@@ -30,6 +27,7 @@ public partial class TestRifle : Node3D
 	{
 		InMag = MagSize;
 		_owner = GetParent() as Node3D;
+		Use ??= new GunUseHint { RangeFit = GunRangeFit.Mid, BestMeters = 18f, OkMeters = 55f, WantsAdsAtFar = true };
 	}
 
 	public override void _Process(double delta)
@@ -45,9 +43,7 @@ public partial class TestRifle : Node3D
 	}
 
 	public void SelectTarget(Node3D t) => Target = t;
-
 	public bool CheckAmmo() => InMag > 0;
-
 	public void SetAds(bool on) => Ads = on;
 
 	public bool Reload()
@@ -58,10 +54,7 @@ public partial class TestRifle : Node3D
 		return true;
 	}
 
-	public bool PrimaryFire(Vector3 aimPoint)
-	{
-		return Fire(aimPoint, 1f);
-	}
+	public bool PrimaryFire(Vector3 aimPoint) => Fire(aimPoint, 1f);
 
 	public bool SecondaryFire(Vector3 aimPoint)
 	{
