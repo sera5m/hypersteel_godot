@@ -2,11 +2,6 @@ using Godot;
 
 namespace Hypersteel.Entity;
 
-/// <summary>
-/// Strength = combat scalar (recoil, melee, turn tax).
-/// LiftKg = two-hand pick cap. Not the same number.
-/// One hand = current mass + half of (LiftKg - mass).
-/// </summary>
 [GlobalClass]
 public partial class EntityStats : Resource
 {
@@ -53,4 +48,14 @@ public partial class EntityStats : Resource
 
 	public bool CanTwoHand(float kg) => kg <= LiftKg + 0.01f;
 	public bool CanOneHand(float kg, float currentMass) => kg <= OneHandLift(currentMass) + 0.01f;
+
+	/// <summary>Lift left after this hold is committed.</summary>
+	public float ThrowForceLeft(float heldKg) => Mathf.Max(0f, LiftKg - Mathf.Max(0f, heldKg));
+
+	/// <summary>Throw only if object mass ≤ half of lift left after holding it.</summary>
+	public bool CanThrow(float objectKg)
+	{
+		var left = ThrowForceLeft(objectKg);
+		return objectKg <= left * 0.5f + 0.01f;
+	}
 }
