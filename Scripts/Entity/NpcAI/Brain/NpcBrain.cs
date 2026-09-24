@@ -12,6 +12,7 @@ public partial class NpcBrain : Node
 	[Export] public float HazardRayMeters = 3.5f;
 	[Export] public float CoverSampleMeters = 5f;
 	[Export] public float RollMinTaken = 8f;
+	[Export] public float StimSeekRadius = 14f;
 
 	public NpcReflex Reflex { get; } = new();
 	public NpcVision Vision { get; } = new();
@@ -82,6 +83,7 @@ public partial class NpcBrain : Node
 		Sense.SuggestedMacro = UseMeshConsensus ? Sense.SuggestedMacro : NpcMacroIntent.None;
 		Sense.WorldHazardAhead = false;
 		Sense.HasCover = false;
+		Sense.HasStim = false;
 
 		if (_body.health?.State != null)
 		{
@@ -102,6 +104,11 @@ public partial class NpcBrain : Node
 			if (NpcVision.InCone(look, p - _body.GlobalPosition, Stats != null ? Stats.VisionConeDeg : 110f))
 				Vision.NotifySeen(Stats);
 		}
+
+		// Stim presence for HelpDying / SeekWorld (17-items)
+		var stim = NpcWorldUse.Nearest(_body, NpcWorldKind.Stim, StimSeekRadius);
+		if (stim != null)
+			Sense.HasStim = true;
 
 		SampleHazardAndCover();
 	}
@@ -197,11 +204,25 @@ public partial class NpcBrain : Node
 		return verb;
 	}
 
+	/// <summary>TeamComms HelpDying: stim (17) if present, else go to dying ally. Cover already preferred by Execution when HasCover.</summary>
 	NpcVerb HelpDying(NpcVerb verb)
 	{
 		if (Role == null || !Role.HasTeamComms || Morale.State == NpcMoraleState.Terrified) return verb;
 		var ally = Comms.DyingAlly();
 		if (ally == null) return verb;
+
+		// Prefer stim when one is in range (self-stim then cover/ally). Same world_pickup path as 17.
+		if (Sense.HasStim)
+		{
+			var stim = NpcWorldUse.Nearest(_body, NpcWorldKind.Stim, StimSeekRadius);
+			if (stim != null)
+			{
+				Sense.LastKnownTarget = stim.GlobalPosition;
+				Sense.HasLastKnown = true;
+				return NpcVerb.MoveAndAttack;
+			}
+		}
+
 		Sense.LastKnownTarget = ally.GlobalPosition;
 		Sense.HasLastKnown = true;
 		return NpcVerb.MoveAndAttack;
@@ -212,6 +233,17 @@ public partial class NpcBrain : Node
 		if (_body == null) return verb;
 		if (Sense.OccupantHp01 > 0f && Sense.OccupantHp01 < 0.4f)
 		{
+			// Stim first (fast crumb), then Health kit
+			if (Sense.HasStim)
+			{
+				var stim = NpcWorldUse.Nearest(_body, NpcWorldKind.Stim, StimSeekRadius);
+				if (stim != null)
+				{
+					Sense.LastKnownTarget = stim.GlobalPosition;
+					Sense.HasLastKnown = true;
+					return NpcVerb.MoveAndAttack;
+				}
+			}
 			var kit = NpcWorldUse.Nearest(_body, NpcWorldKind.Health);
 			if (kit != null) { Sense.LastKnownTarget = kit.GlobalPosition; Sense.HasLastKnown = true; return NpcVerb.MoveAndAttack; }
 		}

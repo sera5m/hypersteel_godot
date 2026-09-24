@@ -74,5 +74,5 @@ Off unless TeamComms module on. Rank int: higher obeys. Same rank: role-weighted
 2. [x] HoldBand + range switch.
 3. [x] Terrified / Enraged hooks.
 4. [x] Cover + BackOutOfView.  (Cover EQS-lite + forward hazard ray in TickSense 2026-09-24; BackOutOfView via GetOutOfView + hazard rewrite)
-5. TeamComms + rank.
+5. [x] TeamComms + rank + HelpDying stim (17).  (Sense.HasStim + HelpDying prefers stim then ally; SeekWorld stim when HP low 2026-09-24)
 6. Traps / bounce / accel lead.
