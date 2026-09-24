@@ -44,4 +44,7 @@ public struct NpcSenseSnapshot
 	public Godot.Vector3 WorldHazardPoint;
 	public bool HasCover;
 	public Godot.Vector3 CoverPoint;
+	/// <summary>Trap/portal stub: nav_portal in range (wait / PlaceAtPortal later).</summary>
+	public bool HasPortal;
+	public Godot.Vector3 PortalPoint;
 }

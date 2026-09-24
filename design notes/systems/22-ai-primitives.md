@@ -44,6 +44,8 @@ C = clamp(vis * exp(-t/tau) * (1 - theta/thetaMax) / cover, 0, 1)
 
 Door/exit = nav portal. PlaceAtPortal. Own traps: team id, step-over no friendly detonate. StickMunition, CutReel, DropBlocker, RaiseCover. Int gate.
 
+Stub: `NpcTrapPortal` (NearestPortal + PlaceAtPortal log-only mark). Group `nav_portal`. No spawn / arm yet. 2026-09-24.
+
 ## Combos
 
 High Int or Agility may chain official Status from 15. No AI-only combo packet.
@@ -75,4 +77,4 @@ Off unless TeamComms module on. Rank int: higher obeys. Same rank: role-weighted
 3. [x] Terrified / Enraged hooks.
 4. [x] Cover + BackOutOfView.  (Cover EQS-lite + forward hazard ray in TickSense 2026-09-24; BackOutOfView via GetOutOfView + hazard rewrite)
 5. [x] TeamComms + rank + HelpDying stim (17).  (Sense.HasStim + HelpDying prefers stim then ally; SeekWorld stim when HP low 2026-09-24)
-6. Traps / bounce / accel lead.
+6. [~] Traps / bounce / accel lead.  (NpcTrapPortal PlaceAtPortal stub + nav_portal group 2026-09-24; bounce-guess STUB and AimLeadAccel still open)

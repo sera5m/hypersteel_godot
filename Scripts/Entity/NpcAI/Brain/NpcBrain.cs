@@ -13,6 +13,7 @@ public partial class NpcBrain : Node
 	[Export] public float CoverSampleMeters = 5f;
 	[Export] public float RollMinTaken = 8f;
 	[Export] public float StimSeekRadius = 14f;
+	[Export] public float PortalSeekRadius = 12f;
 
 	public NpcReflex Reflex { get; } = new();
 	public NpcVision Vision { get; } = new();
@@ -84,6 +85,7 @@ public partial class NpcBrain : Node
 		Sense.WorldHazardAhead = false;
 		Sense.HasCover = false;
 		Sense.HasStim = false;
+		Sense.HasPortal = false;
 
 		if (_body.health?.State != null)
 		{
@@ -109,6 +111,14 @@ public partial class NpcBrain : Node
 		var stim = NpcWorldUse.Nearest(_body, NpcWorldKind.Stim, StimSeekRadius);
 		if (stim != null)
 			Sense.HasStim = true;
+
+		// Trap/portal stub: mark nearest nav_portal for later wait / PlaceAtPortal
+		var portal = NpcTrapPortal.NearestPortal(_body, PortalSeekRadius);
+		if (portal != null)
+		{
+			Sense.HasPortal = true;
+			Sense.PortalPoint = portal.GlobalPosition;
+		}
 
 		SampleHazardAndCover();
 	}
@@ -281,6 +291,10 @@ public partial class NpcBrain : Node
 		return NpcVision.CanFireWithoutTurn(look, to, slack)
 		       || NpcVision.TurnTime(look, to, slack, Stats != null ? Stats.TurnRateDeg : 320f) <= (Stats != null ? Stats.PreRotate : 0.2f);
 	}
+
+	/// <summary>Trap portal stub entry. Logs PlaceAtPortal; no munition spawn.</summary>
+	public bool TryPlaceTrap(NpcTrapKind kind) =>
+		NpcTrapPortal.PlaceAtPortal(_body, kind, out _);
 
 	public void IncomingNade(Vector3 from)
 	{
