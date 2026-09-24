@@ -25,16 +25,31 @@ public partial class NpcBrain : Node
 	public NpcSenseSnapshot Sense;
 
 	ActorEntity _body;
+	PawnActions _pawn;
 
 	public override void _Ready()
 	{
 		_body = GetParent() as ActorEntity;
 		Role ??= new NpcRoleDef { RoleId = "soldier", DefaultVerb = NpcVerb.MoveAndAttack, PreferredRange = 18f };
-		Stats ??= new NpcStats();
+		Stats ??= (_body?.Stats as NpcStats) ?? new NpcStats();
 		Loadout.Bind(_body);
+		EnsurePawn();
 		if (_body != null) _body.AddToGroup("npc_squad");
 		if (_body?.health != null) _body.health.Damaged += OnDamaged;
 		if (_body?.feelings != null) _body.feelings.Flinch += OnFlinch;
+	}
+
+	void EnsurePawn()
+	{
+		if (_body == null) return;
+		_pawn = _body.GetNodeOrNull<PawnActions>("PawnActions");
+		if (_pawn == null)
+		{
+			_pawn = new PawnActions { Name = "PawnActions" };
+			_body.AddChild(_pawn);
+		}
+		_pawn.Bind(_body);
+		if (Loadout.Gun != null) _pawn.SetGun(Loadout.Gun);
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -256,13 +271,19 @@ public partial class NpcBrain : Node
 			Loadout.PickSlot(_body.GlobalPosition.DistanceTo(Sense.LastKnownTarget), Role.CloseRange, Role.FarRange, false);
 		var gun = Loadout.Gun;
 		if (gun == null || ActiveVerb != NpcVerb.MoveAndAttack) return;
-		if (Loadout.NeedsReload) { gun.Reload(); return; }
+		EnsurePawn();
+		_pawn?.SetGun(gun);
+		if (Loadout.NeedsReload) { _pawn?.Reload(); return; }
 		if (!Sense.HasLastKnown) return;
+		var dist = _body.GlobalPosition.DistanceTo(Sense.LastKnownTarget);
+		if (gun.Use != null && gun.Use.WantsAdsAtFar && dist >= Role.FarRange)
+			_pawn?.SetAds(true);
 		var aim = Sense.LastKnownTarget;
 		if (AimLead.Flat(_body.GlobalPosition, Sense.LastKnownTarget, Vision.LastVel, gun.Muzzle, out var lead, out _))
 			aim = lead;
 		if (!CanAttackAim(aim)) return;
-		gun.PrimaryFire(aim);
+		if (_pawn == null || !_pawn.Fire(aim))
+			gun.PrimaryFire(aim);
 	}
 
 	public bool CanAttackAim(Vector3 aimPoint)
@@ -273,8 +294,12 @@ public partial class NpcBrain : Node
 		var cone = Stats != null ? Stats.VisionConeDeg : 110f;
 		var slack = Stats != null ? Stats.AimSlackDeg : 30f;
 		if (!NpcVision.InCone(look, to, cone)) return false;
+		var str = Stats != null ? Stats.Strength : 1f;
+		var slow = Loadout.Gun != null ? Loadout.Gun.TurnSlowdown(str) : 0f;
+		var turn = Stats != null ? Stats.LiveTurnRate(slow) : 320f;
+		var pre = Stats != null ? Stats.PreRotate : 0.2f;
 		return NpcVision.CanFireWithoutTurn(look, to, slack)
-		       || NpcVision.TurnTime(look, to, slack, Stats != null ? Stats.TurnRateDeg : 320f) <= (Stats != null ? Stats.PreRotate : 0.2f);
+		       || NpcVision.TurnTime(look, to, slack, turn) <= pre;
 	}
 
 	public bool TryPlaceTrap(NpcTrapKind kind) => NpcTrapPortal.PlaceAtPortal(_body, kind, out _);
