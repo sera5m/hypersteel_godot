@@ -15,7 +15,6 @@ public partial class TestRifle : Gun
 	[Export] public bool Hitscan = true;
 
 	public int InMag { get; private set; }
-	public bool Ads { get; private set; }
 	public bool Reloading { get; private set; }
 	public Node3D Target { get; private set; }
 
@@ -44,23 +43,18 @@ public partial class TestRifle : Gun
 
 	public void SelectTarget(Node3D t) => Target = t;
 	public bool CheckAmmo() => InMag > 0;
-	public void SetAds(bool on) => Ads = on;
 
 	public bool Reload()
 	{
 		if (Reloading || InMag >= MagSize || Reserve <= 0) return false;
 		Reloading = true;
-		_reloadLeft = ReloadTime;
+		_reloadLeft = ReloadFor(ReloadTime, 1f, 1f);
 		return true;
 	}
 
 	public bool PrimaryFire(Vector3 aimPoint) => Fire(aimPoint, 1f);
 
-	public bool SecondaryFire(Vector3 aimPoint)
-	{
-		SetAds(true);
-		return Fire(aimPoint, 1.15f);
-	}
+	public bool SecondaryFire(Vector3 aimPoint) => Fire(aimPoint, 1.15f);
 
 	bool Fire(Vector3 aimPoint, float kineticMul)
 	{
@@ -70,11 +64,11 @@ public partial class TestRifle : Gun
 		if (dir.LengthSquared() < 0.01f) dir = -GlobalTransform.Basis.Z;
 		dir = dir.Normalized();
 		InMag--;
-		var packet = DamagePacket.KineticHit(Kinetic * kineticMul, Ap);
+		var packet = DamagePacket.KineticHit(Kinetic * kineticMul, Ap + Kit.ApAdd);
 		packet.Name = "test-rifle";
 		packet.Instigator = _owner;
 		var exclude = _owner is CollisionObject3D body ? body.GetRid() : default;
-		DamageCast.Ray(this, from, dir, Range, packet, exclude);
+		DamageCast.Ray(this, from, dir, Range * Kit.Vel, packet, exclude);
 		return true;
 	}
 }
