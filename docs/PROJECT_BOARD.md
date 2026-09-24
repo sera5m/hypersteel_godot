@@ -44,10 +44,11 @@ https://github.com/sera5m/hypersteel_godot/tree/main/Scripts
 ## Weapons — not started
 Add `Scripts/Weapons/` when begun. Depends on Damage door.
 
-## AI — not started
+## AI — wip
 https://github.com/sera5m/hypersteel_godot/tree/main/Scripts/Entity/NpcAI
 - Soldier Critical stub done | Dummy done | roster law done (`design notes/21-enemy-roster.md`)
-- BT / perception not started (order: dummy soldier shoots/flinches/dies → scout alert → squad leader coord)
+- NpcBrain four-clock + SoldierPawn compose + sense/EQS-lite/reflex LAND 2026-09-24 (walk, AssignedTarget last-known, behind-ray, Dash nade-leap)
+- Next: HoldBand, range, aim leaves, scout RoleDef
 - Valkarie / morale not started
 
 ## Audio / VFX — wip
