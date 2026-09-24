@@ -1,0 +1,87 @@
+using Godot;
+using Hypersteel.Damage;
+
+namespace Hypersteel.Weapons;
+
+/// <summary>
+/// Test gun only. Same DamageCast + packet as a real Type 88 will use.
+/// Inputs: SelectTarget, PrimaryFire, SecondaryFire, Reload, Ads, CheckAmmo.
+/// </summary>
+public partial class TestRifle : Node3D
+{
+	[Export] public int MagSize = 30;
+	[Export] public int Reserve = 90;
+	[Export] public float Muzzle = 80f;
+	[Export] public float Kinetic = 40f;
+	[Export] public int Ap = 3;
+	[Export] public float Range = 80f;
+	[Export] public float ReloadTime = 1.6f;
+	[Export] public bool Hitscan = true;
+
+	public int InMag { get; private set; }
+	public bool Ads { get; private set; }
+	public bool Reloading { get; private set; }
+	public Node3D Target { get; private set; }
+
+	float _reloadLeft;
+	Node3D _owner;
+
+	public override void _Ready()
+	{
+		InMag = MagSize;
+		_owner = GetParent() as Node3D;
+	}
+
+	public override void _Process(double delta)
+	{
+		if (!Reloading) return;
+		_reloadLeft -= (float)delta;
+		if (_reloadLeft > 0f) return;
+		var need = MagSize - InMag;
+		var take = Mathf.Min(need, Reserve);
+		Reserve -= take;
+		InMag += take;
+		Reloading = false;
+	}
+
+	public void SelectTarget(Node3D t) => Target = t;
+
+	public bool CheckAmmo() => InMag > 0;
+
+	public void SetAds(bool on) => Ads = on;
+
+	public bool Reload()
+	{
+		if (Reloading || InMag >= MagSize || Reserve <= 0) return false;
+		Reloading = true;
+		_reloadLeft = ReloadTime;
+		return true;
+	}
+
+	public bool PrimaryFire(Vector3 aimPoint)
+	{
+		return Fire(aimPoint, 1f);
+	}
+
+	public bool SecondaryFire(Vector3 aimPoint)
+	{
+		SetAds(true);
+		return Fire(aimPoint, 1.15f);
+	}
+
+	bool Fire(Vector3 aimPoint, float kineticMul)
+	{
+		if (Reloading || InMag <= 0) return false;
+		var from = GlobalPosition + Vector3.Up * 1.4f;
+		var dir = aimPoint - from;
+		if (dir.LengthSquared() < 0.01f) dir = -GlobalTransform.Basis.Z;
+		dir = dir.Normalized();
+		InMag--;
+		var packet = DamagePacket.KineticHit(Kinetic * kineticMul, Ap);
+		packet.Name = "test-rifle";
+		packet.Instigator = _owner;
+		var exclude = _owner is CollisionObject3D body ? body.GetRid() : default;
+		DamageCast.Ray(this, from, dir, Range, packet, exclude);
+		return true;
+	}
+}
