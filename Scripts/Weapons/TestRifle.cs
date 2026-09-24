@@ -3,7 +3,7 @@ using Hypersteel.Damage;
 
 namespace Hypersteel.Weapons;
 
-public partial class TestRifle : Node3D
+public partial class TestRifle : Gun
 {
 	[Export] public int MagSize = 30;
 	[Export] public int Reserve = 90;
@@ -13,7 +13,6 @@ public partial class TestRifle : Node3D
 	[Export] public float Range = 80f;
 	[Export] public float ReloadTime = 1.6f;
 	[Export] public bool Hitscan = true;
-	[Export] public GunUseHint Use;
 
 	public int InMag { get; private set; }
 	public bool Ads { get; private set; }
@@ -25,6 +24,7 @@ public partial class TestRifle : Node3D
 
 	public override void _Ready()
 	{
+		base._Ready();
 		InMag = MagSize;
 		_owner = GetParent() as Node3D;
 		Use ??= new GunUseHint { RangeFit = GunRangeFit.Mid, BestMeters = 18f, OkMeters = 55f, WantsAdsAtFar = true };
