@@ -44,7 +44,7 @@ public static class NpcExecution
 		wish.Y = 0f;
 		if (wish.LengthSquared() < 0.04f) return;
 
-		var speed = role != null && role.SoftStep ? 3.2f : 4.5f;
+		var speed = (role != null && role.SoftStep ? 3.2f : 4.5f) * body.Stats.Speed;
 		var step = wish.Normalized() * speed;
 		body.Velocity = new Vector3(step.X, body.Velocity.Y, step.Z);
 		body.MoveAndSlide();
