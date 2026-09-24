@@ -9,9 +9,9 @@ public enum NpcWorldKind
 	Stim,
 	Battery,
 	Turret,
+	Sight,
 }
 
-/// <summary>Ambient props. Groups: world_pickup (meta kind), world_turret.</summary>
 public static class NpcWorldUse
 {
 	public static Node3D Nearest(Node from, NpcWorldKind kind, float radius = 18f)
