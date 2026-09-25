@@ -14,3 +14,4 @@ Do not treat these as systems to implement on the main campaign path unless a la
 - `pocket-100m3.md` — collision pocket when two violent exits interfere
 - `plot-hooks.md` — Valkarie, Enduring, mini-bosses, scripted-death branches
 - `post-event.md` — what remains after Halloween
+- `secrets-lineage.md` — White Knuckle / Ultrakill / April Fools secret grammar
