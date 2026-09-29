@@ -119,7 +119,7 @@ Not a bool list. A channel is a name + amount + optional submode.
 | Pyrophoric | One-shot heat + spark splash (small neighbor heat). |
 | Hot | Heat, no splash. |
 | Incendiary | Contact DoT while overlapping; **sticks** if target armor level **>** this AP instead of bounce. |
-| Lightning / Ion | Charge + shock. Above thresholds: chain lightning and/or Zap. |
+| Lightning / Ion | Charge + shock. Above thresholds: chain lightning and/or Zap. Wet/Frozen targets also **store** a capacitor pulse (see below). |
 | Plasma | Heat + ion. |
 | Laser | Cutting + burn. Reflects off Mirror / metal. Ignores plasma shields. |
 | Cutting | With kinetic: blades. |
@@ -133,7 +133,8 @@ Environmental / stance channels on the **target** (status, not on the incoming b
 | Sanded | Shorter fire duration. |
 | Hot (body) | Weapons overheat faster. Energy weapons stronger. Kinetic output from this entity reduced (before target embrittlement mul). |
 | Cold (body) | Weapons do not overheat. Stamina up, heat buildup down. Own kinetic down; own energy up. Incoming kinetic vs cold metal target uses embrittlement mul. |
-| Wet | More shock taken; cannot be Charged. Huge fire resist. |
+| Frozen | Stronger Cold. Brittle. Counts as a **capacitor** with Wet (below). Thaw → Wet briefly. |
+| Wet | More shock taken; cannot be Charged. Huge fire resist. **Capacitor** (below). |
 | Oiled | Slip + flammable. |
 | ExplosiveCoated | Detonate if Burning, overwhelming blunt, or Shocked. |
 | Bleeding | Flesh only. HP leak. |
@@ -152,6 +153,23 @@ Environmental / stance channels on the **target** (status, not on the incoming b
 Flashbang: Blinded + Deafened + Paralyzed/Stun.
 Taser: Zapped + Ion + Paralyzed. No blind/deaf.
 
+### Wet / Frozen capacitor
+
+Wet or Frozen bodies **store Ion / Lightning** instead of only taking it once.
+
+On an Ion/Lightning packet (and Plasma that writes ion) while Wet or Frozen:
+
+1. Resolve the hit as usual (Wet already multiplies shock taken).
+2. Write a **stored charge** on that segment = a fraction of the incoming ion magnitude (sheet knob; default ~50%). Frozen stores more than Wet.
+3. After a **short delay** (~0.4–0.8 s, sheet), the body **re-emits** a shock pulse:
+   - self: second Ion tick + possible Zap / brief Paralyze
+   - neighbors in a small radius / contact: weaker Ion splash
+4. Stored charge dumps once. A new ion hit while still Wet/Frozen can refill, but **does not stack unbounded** — cap at one stored pulse per segment.
+5. Wet still **blocks Charged** as a plate state. Capacitor is not Charged; it is a delayed re-emit. They are different flags.
+6. If ExplosiveCoated is also on the body, the re-emit counts as Shocked for the coat cook-off.
+
+Ice grenade → lightning → plasma bloom is this rule plus Plasma on a body that just dumped charge, not a special case in Resolve.
+
 ---
 
 ## AP vs armor ladder
@@ -160,7 +178,7 @@ Taser: Zapped + Ion + Paralyzed. No blind/deaf.
 Use **effective** armor after attributes / acid / shatter / heat.
 
 | Outcome | Condition | Kinetic that lands |
-|---|---|---|
+|---|---|
 | Null | ap ≤ armor − 8 | 0. Impact sound only. |
 | Bounce | ap ≤ armor − 4 (and not Null) | 20% + 5% per level closer to Damage band; −5% per extra level toward Null. Clamp ≥ 0. |
 | Damage | \|ap − armor\| ≤ 2 | 100% |
@@ -172,7 +190,7 @@ Incendiary exception: if armor **>** ap, **stick** instead of Bounce when the in
 ### Armor levels (int)
 
 | Lvl | Name | Meaning |
-|---|---|---|
+|---|---|
 | 0 | Unarmored | Thin tissue (fingers). |
 | 1 | Durable | Unarmored human chest. |
 | 2 | Trivial | ~3 mm aluminum. |
@@ -231,6 +249,7 @@ Hot vs Cold body.
 Stimmed vs Tranqued.
 Mirror vs “absorb energy” fantasy attrs — Mirror reflect wins for lasers.
 PlasmaShield vs SolidMetal on the **same** layer — illegal; they are different layers (shield then plate).
+Wet/Frozen capacitor is **not** Charged. Do not collapse them.
 
 ---
 
@@ -277,10 +296,10 @@ Flesh-only sockets ignore bots; bot sockets ignore flesh.
 3. Walk layers inward. For each layer: AP ladder for **kinetic**; other channels follow material (laser vs mirror, DoT vs plasma shield, etc.).
 4. Apply specials (stick, shrapnel, cavitation gib).
 5. Add heat / ion / toxic to segment StatusState.
-6. Ignition / charge / coated-explode thresholds.
+6. Ignition / charge / coated-explode thresholds. If Wet or Frozen and ion landed, **arm capacitor** (do not set Charged).
 7. Write HP. Emit `Damaged(result)` once.
 8. Entity hook: bands, feelings, BT.
-9. Status ticks later in `_PhysicsProcess` on StatusComponent only (DoT expire faster when hot).
+9. Status ticks later in `_PhysicsProcess` on StatusComponent only (DoT expire faster when hot). Capacitor dump fires here after delay.
 
 Resistances = **multipliers on the actor sheet** (`resistKinetic`, `resistThermal`, …`) applied after the layer walk, not new code paths.
 
