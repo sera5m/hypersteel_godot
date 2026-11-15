@@ -135,3 +135,30 @@ Dev does not enter the tank: “because I would die in there. Unlike you I need 
 - **Poor training** — reduced accuracy, increased fear, easier to fool, increased focus time on guns. Cannot hit shots reliably without ADS.
 
 The joke is that she understands the systems better than the soldiers and still has civilian numbers. She plans, glitches, and learns weapons quickly, then misses because she is not an operator. The VR-port / isekai panic is the contained fourth-wall beat; it does not change the world or the campaign. The recruit path offers a one-time skip of a long drone sequence and then ends.
+
+---
+
+## Halloween afterlife idea (non-canon gag, to rework later)
+
+**Idea only.** Not locked. Seasonal / secret mode gag. Do not treat as campaign spine or death-system change.
+
+When you die, instead of the usual reprint the suit-AI goes quiet. You wake as a soul-wanderer in an afterlife that is just reskinned existing maps:
+
+- Surfaces coated in ~15 cm of sticky blood that slightly slows movement and leaves footprints.
+- Permanent electrical storm skybox; no real rain, just thunder and short HUD shorts.
+- Distant JumpKit pulses that are not yours. Corpses you left earlier slowly stand back up with the wrong number of eyes.
+- Or the pure gag version: infinite flat concrete under a low red sky. Athena skyline visible but never gets closer. Random match corpses drift past. One out-of-order vending machine that sells expired Japanese energy drinks and a permanently broken “Reprint Request” button. Suit-AI narrates in flat kill-feed tone: “Soul continuity: provisional. Estimated reprint window: unknown. Suggestion: walk.”
+
+Reprint still happens eventually (suit just takes longer to re-acquire the signature). Players who die a lot start recognizing the same blood hallway and get annoyed. Later rework: either drop it, make it a proper limited event, or turn the infinite plane into a message-board / graffiti space.
+
+Higher-dimensional manifolds as the “real” location of the afterlife is also just an idea floating around; nothing locked. If it ever gets written, it lives here first as a gag stub.
+
+---
+
+## Dating sim gag (April Fools / drawer)
+
+**Non-canon.** Optional leak / seasonal joke. Does not touch campaign spine or character arcs.
+
+Ryko’s save-results goof and dump a dating-sim mode into meatspace Valkarie’s link. Valkarie finds it funny and is relieved (the “movie-date / reluctant pair” beat stays drawer-fic / implied only; the Athena sting is still just the reprint slugfest then “fuck it / too fun to waste”).
+
+The gag is that the sim exists as a corrupted save or a wrong-mode boot, not as a real relationship track. Valkarie’s reaction is “oh thank god this is just a glitch” rather than any actual romance beat. Keep it contained. Do not promote it to optional campaign content.
