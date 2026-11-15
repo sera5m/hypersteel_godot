@@ -94,6 +94,7 @@ TF2 Über + Titanfall stim, one verb.
 
 - Massive speed + heal burst on **self** or a **designated humanoid** in range.
 - Heal is HP write + `Stimmed` (already a Status tag: fight harder, bleed faster, stun/poison resist).
+- **Significantly increased APM** while `Stimmed`: faster input processing on all actions (reloads, swaps, melee, pack pulses, crouch/slide). Fire rate rises because the merc can pull the trigger twice per real-life depress (plus a small boost on top). Weak-spot aim assist is optional/later — not locked.
 - Does not work on walkers / vehicles (body plan / no Flesh). Can work on FleshBorged.
 - Battery hip makes this cheaper or longer. Thermal hip does nothing special.
 
