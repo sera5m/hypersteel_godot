@@ -205,6 +205,20 @@ Also: request an AI squad, or drop a jam cylinder. Both fail under jam and indoo
 
 Do **not** hook this into campaign command. It is an MP sky map toy.
 
+
+### Phase anchor
+
+Short-lived tether that does not move you.
+
+- Pulse places a small anchor projector at your feet (or on a surface you are touching). It lasts 8 s or until you fire it.
+- While the anchor is live you can pulse again to snap **back** to it from anywhere in line of sight, up to 25 m. You keep your current velocity on arrival.
+- The anchor is a visible, shootable child actor (low plate HP). Destroying it ends the tether early.
+- Cannot pass through solid geometry. If the return path is blocked you stop at the first solid and take a small Blunt packet.
+- Cooldown starts when the anchor dies or expires, not when you place it.
+- Does not work while ragdolled, grappled, or inside a PlasmaShield that is not your own.
+
+Legal with most hips. Illegal with Teleport pack (two position-swap verbs). Radio jam does not affect it.
+
 ### Micro-missile pack
 
 - 4 charges, 30 s each.
@@ -226,6 +240,8 @@ Closed list, sheet-side, not Resolve.
 - Juggernaut + Plasma bubble = illegal (two full-body defense packs). Pick one.
 - Radio + indoor map = pack disabled or charges frozen.
 - Teleport + Hollo = legal; decoys do not teleport.
+- Phase anchor + Teleport = illegal (two position-swap verbs). Pick one.
+- Phase anchor + Juggernaut = legal; the anchor is still shootable.
 - Engineer + Autofense = two turret sources. Cap total spawned guns per player (say 5) so the map does not drown.
 
 ---
