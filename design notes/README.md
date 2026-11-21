@@ -20,3 +20,4 @@ Systems: this folder + engine `docs/` (damage is locked there).
 | `17-items-ammo.md` | Shared ammo + bag |
 | `18-weather-ambiance.md` | Weather field; Status is a handoff |
 | `21-enemy-roster.md` | Unreal roster ingest. Kits, not classes |
+| `systems/28-combat-belt.md` | 4-slot combat belt, has_belt_clip, pouch vs belt |
