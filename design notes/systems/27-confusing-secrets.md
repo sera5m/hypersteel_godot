@@ -175,6 +175,9 @@ Secret shotgun ammo, an in-world chemical round rather than a real-world brand o
 
 ### The hat man (decided 2026-11-23)
 
+![Hat man shirt meme](images/hat-man-shirt.jpg)
+![25 gram Benadryl meme](images/25g-benadryl.jpg)
+
 **Exact prompt from design discussion:** "Add the hat man to 27-confusing, but make the delerium shell as a gag where it has a 1/50 chance of the hat man appearing as a shadow of pure darkness right next to them,and he tips his hat and the enemy instantly gibs into pink instead of blood or oil or whatever"
 
 - Each enemy hit by a delirium shell has a 1/50 chance to trigger the hat man.
