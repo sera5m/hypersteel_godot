@@ -188,3 +188,4 @@ Snipers will try to shoot your hand or head
 - **Enemies fake surrender.** At high heat, a soldier begging for their life might be stalling while a teammate flanks, which makes the morality beat a real gamble.
 - **Your own kills give you away.** Dead enemies' radios keep broadcasting, so a quiet kill leaves a squad calling a dead man and coming to check.
 - **Vehicles chase you through walls.** Tanks and trucks drive through the weaker walls of the building Ryko is hiding in.
+- **Strong enemies flip vehicles.** Extremely strong enemies can flip small vehicles, and Enduring or mechs can flip tanks.
