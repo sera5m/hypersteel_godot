@@ -137,3 +137,9 @@ Cyborg enemies can now rip turret guns or vehicle mount weapons off and shoot yo
 Robots explode on death or catch fire if battery hit (already should be in baseline, but they should do way more damage now)
 In the rain, lithium dust spontaneously ignites 
 Superconductors in anything can now violently detonate and release emp if their temperature rises above their max temperature instead of just melting
+
+### Ryko pain audio (decided 2026-11-22)
+
+- Normally Ryko only makes small noises when she takes heavy hits, not on chip damage. Keeping her stoic most of the time is what makes these sounds land.
+- At low health, each heavy hit has a 1/100 chance of starting a very quiet "nonononono" line.
+- This pairs with the distressed state in the ultra hard additions above.
