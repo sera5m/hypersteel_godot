@@ -176,3 +176,4 @@ Snipers will try to shoot your hand or head
 - Baseline rule (already in the game): Dev only attacks Ryko if Ryko attacks her.
 - Unlike every other enemy, Dev doesn't care about killing Ryko. She will do literally anything to stay alive. On canon she's just more determined about it.
 - Dev can now use vehicle-mounted weapons, with an accuracy penalty. Carrying one makes her slower: she can run and fire it (not sprint), but she gasses out fast.
+- Final stand: if Dev is at low health, out of ammo, and can't escape, she instantly enters final stand. She will punch Ryko or stab her in the crit point, even while her own arm breaks.
