@@ -163,3 +163,8 @@ Flashbangs no longer affect some enemies if enraged because they will leap throu
 Redline's bike afterburner now does fire damage and pushes ryko back
 
 Snipers will try to shoot your hand or head
+
+### Sniper hand hits (decided 2026-11-22)
+
+- The effect of a sniper hit on Ryko's hand depends on limb health.
+- If the hand is at critical health, she drops her gun. Her magnetic holster automatically grabs it while the limb regenerates.
