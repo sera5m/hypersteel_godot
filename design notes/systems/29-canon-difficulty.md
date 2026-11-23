@@ -143,3 +143,23 @@ Superconductors in anything can now violently detonate and release emp if their 
 - Normally Ryko only makes small noises when she takes heavy hits, not on chip damage. Keeping her stoic most of the time is what makes these sounds land.
 - At low health, each heavy hit has a 1/100 chance of starting a very quiet "nonononono" line.
 - This pairs with the distressed state in the ultra hard additions above.
+
+---
+
+## More canon difficulty additions
+
+Exact prompt from design discussion (2026-11-22):
+
+Fuck it on cannon difficulty dev can parry hand grenades thrown at her and yell "HOME FUCKING RUN", but not contact explosives. 
+Cannon difficulty dev can now smack guns out of weaker enemies hands
+
+Valkarie can attempt to bite ryko if you manage to grapple her ,and can shank you while doing this
+
+Arsonist can now throw c4, and has magnesium thermite with flashbang effects 
+
+Flashbangs no longer affect some enemies if enraged because they will leap through it to punch you in the face
+
+
+Redline's bike afterburner now does fire damage and pushes ryko back
+
+Snipers will try to shoot your hand or head
