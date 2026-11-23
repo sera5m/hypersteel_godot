@@ -89,3 +89,20 @@ Up to 16 satellite-dropped copies, Helldivers-style, while you dodge artillery a
 Both versions can share the enemy-side upgrades (faster, higher fight IQ, more grenades, wall-pierce, suicide options, learning bosses, etc.). The permadeath branch adds the material-repair restriction, the perception overclock, the longer retry lockout, and the harsher reactor/limb failure states. The non-permadeath branch adds the drop-pod reserve and the mid-air defense sequence.
 
 This stays inside the “real physics + on-screen feats canon” frame. Nothing here requires Ryko to suddenly be town-level; it just makes the existing building-level chassis fight a world that is allowed to use all the tools the setting already has.
+
+---
+
+## Further relentless behaviors
+
+- **Persistent hunt markers.** Once an enemy squad has positive ID on Ryko, they do not reset on line-of-sight break. They keep a decaying last-known + velocity estimate and keep moving to cut her off. Killing the squad does not clear the marker; the next wave inherits it.
+- **Ammo denial as a tactic.** Enemies specifically shoot at her weapons, plasma ports, and any visible repair materials or dropped kits. They will spend grenades to destroy a resupply crate or a downed ally’s gear rather than shoot her if the crate is the higher-value target.
+- **Coordinated “make her spend it” plays.** Groups will deliberately trigger her dash/JumpKit or force a plasma charge, then immediately push while those are on cooldown. They track cooldowns the same way they track grenade counts.
+- **Live blueprint updates.** If she uses a specific counter (wall-pierce ignore, suicide-bomb denial, reactor-protect stance, etc.) more than once, later squads arrive already briefed on it. The neural-net bosses are the extreme; ordinary officers get a shorter “we saw what she did to 3rd platoon” version.
+- **Building as ammunition.** Beyond dropping the whole structure, they will blow specific load-bearing sections to create new kill zones, funnel her into pre-sighted lanes, or bury repair caches. Engineers treat architecture as a consumable.
+- **Medical interdiction.** Any time she starts a material repair or the suit-AI begins a reprint stabilization, nearby enemies get a “disruption” priority. They will grenade, EMP, or suicide-bomb the exact spot even if it costs them.
+- **Chain-of-command acceleration.** Killing an officer does not create a gap; the next ranked soldier immediately inherits provisional authority (including the illegal-weapon / low-yield / gravity-trap permissions) and announces it. There is no “leaderless and confused” window.
+- **Sound as a weapon.** Footstep audio is already louder; add active noise-makers (dropped screamers, engine revs, infrasound pulses from vehicles) that mask their own movement while highlighting hers. Some units carry one-shot sonic lures specifically to pull her dashes.
+- **No-reset reinforcement logic.** Leaving an area does not despawn the response. The reinforcement budget keeps spending until the sector is cleared or the budget hits zero. Walking away just means the next fight has more of them.
+- **Post-mortem spite.** Enemies who know they are dying and cannot escape will prioritize one last action that hurts her specifically: cooking a grenade in a repair pile, EMP-pulsing on death, or triggering a trapped corridor they already mined. The weeping self-termination is one version; this is the version that still tries to take something with them.
+
+All of these keep the “trained soldiers who are scared of her and still professional” read. They do not require new AP tiers or break the real-physics frame; they just remove the usual cooldowns on enemy thinking and resource use. The result is that every engagement feels like the entire local force has already decided she does not get to leave.
