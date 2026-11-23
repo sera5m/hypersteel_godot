@@ -177,3 +177,14 @@ Snipers will try to shoot your hand or head
 - Unlike every other enemy, Dev doesn't care about killing Ryko. She will do literally anything to stay alive. On canon she's just more determined about it.
 - Dev can now use vehicle-mounted weapons, with an accuracy penalty. Carrying one makes her slower: she can run and fire it (not sprint), but she gasses out fast.
 - Final stand: if Dev is at low health, out of ammo, and can't escape, she instantly enters final stand. She will punch Ryko or stab her in the crit point, even while her own arm breaks.
+
+### More ultra hard additions (decided 2026-11-22)
+
+- **Enemies learn which cover you like.** If Ryko keeps returning to the same spot, the next squad pre-sights it, mines it, or levels it before she arrives.
+- **Wounded soldiers play dead.** Some downed enemies who aren't dead yet get up behind Ryko or toss a grenade once she walks past, so the player has to choose between spending ammo confirming kills and taking the risk.
+- **Repair materials can be fake.** Enemies leave out booby-trapped material caches, so the thing Ryko needs to heal could kill her.
+- **Ryko's lenses fog or get smeared.** Rain, smoke and blood dirty her optics, and wiping them costs a fraction of a second.
+- **Snipers wait for you to commit.** They hold fire until Ryko is mid-dash or mid-repair, when she can't dodge.
+- **Enemies fake surrender.** At high heat, a soldier begging for their life might be stalling while a teammate flanks, which makes the morality beat a real gamble.
+- **Your own kills give you away.** Dead enemies' radios keep broadcasting, so a quiet kill leaves a squad calling a dead man and coming to check.
+- **Vehicles chase you through walls.** Tanks and trucks drive through the weaker walls of the building Ryko is hiding in.
