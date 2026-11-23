@@ -170,3 +170,9 @@ Snipers will try to shoot your hand or head
 - If the hand is at critical health, she drops her gun. Her magnetic holster automatically grabs it while the limb regenerates.
 - Clarification: Ryko has a small amount of passive regen even on canon difficulty, but it needs new material to rebuild from. "Cannot passively regen" above means she can't regenerate without materials.
 - While the dropped-gun hand recovers, she can use her left hand to compensate.
+
+### Dev on canon difficulty (decided 2026-11-22)
+
+- Baseline rule (already in the game): Dev only attacks Ryko if Ryko attacks her.
+- Unlike every other enemy, Dev doesn't care about killing Ryko. She will do literally anything to stay alive. On canon she's just more determined about it.
+- Dev can now use vehicle-mounted weapons, with an accuracy penalty. Carrying one makes her slower: she can run and fire it (not sprint), but she gasses out fast.
