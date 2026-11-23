@@ -162,3 +162,11 @@ Higher-dimensional manifolds as the “real” location of the afterlife is also
 Ryko’s save-results goof and dump a dating-sim mode into meatspace Valkarie’s link. Valkarie finds it funny and is relieved (the “movie-date / reluctant pair” beat stays drawer-fic / implied only; the Athena sting is still just the reprint slugfest then “fuck it / too fun to waste”).
 
 The gag is that the sim exists as a corrupted save or a wrong-mode boot, not as a real relationship track. Valkarie’s reaction is “oh thank god this is just a glitch” rather than any actual romance beat. Keep it contained. Do not promote it to optional campaign content.
+
+---
+
+## Delirium shell (secret item)
+
+**Exact prompt from design discussion:** "Should we add this to the game" (meme: "Fuck rock salt and nails, home intruders get to go into the pocket dimension." with a shotgun shell packed with pink allergy pills) / "I mean it would be a funny secret item to add yeah."
+
+Secret shotgun ammo, an in-world chemical round rather than a real-world brand or recipe. Hit enemies go delirious: they hallucinate, shoot at shadows, swing at nothing, wander off, or turn on each other. Ultra hard idea (not decided): enemies can carry it too, so Ryko's HUD starts showing fake contacts.
