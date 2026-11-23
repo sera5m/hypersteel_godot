@@ -168,3 +168,5 @@ Snipers will try to shoot your hand or head
 
 - The effect of a sniper hit on Ryko's hand depends on limb health.
 - If the hand is at critical health, she drops her gun. Her magnetic holster automatically grabs it while the limb regenerates.
+- Clarification: Ryko has a small amount of passive regen even on canon difficulty, but it needs new material to rebuild from. "Cannot passively regen" above means she can't regenerate without materials.
+- While the dropped-gun hand recovers, she can use her left hand to compensate.
