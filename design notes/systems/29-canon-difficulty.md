@@ -106,3 +106,34 @@ This stays inside the “real physics + on-screen feats canon” frame. Nothing 
 - **Post-mortem spite.** Enemies who know they are dying and cannot escape will prioritize one last action that hurts her specifically: cooking a grenade in a repair pile, EMP-pulsing on death, or triggering a trapped corridor they already mined. The weeping self-termination is one version; this is the version that still tries to take something with them.
 
 All of these keep the “trained soldiers who are scared of her and still professional” read. They do not require new AP tiers or break the real-physics frame; they just remove the usual cooldowns on enemy thinking and resource use. The result is that every engagement feels like the entire local force has already decided she does not get to leave.
+
+---
+
+## Ultra hard and above additions
+
+Exact prompt from design discussion (2026-11-22):
+
+I think we've just discovered peak :p
+Also on ultra hard or higher 
+
+Enduring can now throw you in the air and shoot you to juggle you
+Valkarie can call air support, and her missules now have airburst if you dodge them
+Dev can now use nearby cannons if ryko attacks her,and starts with eight thermite magnesium airburst grenades
+Dev starts in a multiplayer operator body
+Dev can remote control any equipment within 5m of her
+Passive dev hugs ryko
+Snipers now don't loose lock if you dodge or parry
+Enemies can now fire microwave guns at ryko
+Enemies form prefab encampments on poi
+Some enemies now get access to a juggernaut suit and can "walk ryko down" directly through fire
+Blademaster enemies can now parry YOUR projectiles (only mach 1.2 and below ) and only projectiles that will hit them in 0.1 seconds
+Enemy projectiles now faster 
+Player projectiles now faster
+Burnt entities now have reduced structural integrity even after put out
+Ryko can now become distressed at low health or after taking and healing from large amounts of damage and hesitate before exiting cover if enemies are on the other side
+Ryko can now become enraged and fires two shots per trigger pull and has faster attacks
+Enduring can now become enraged if you do more damage with guns than melee for "dishonoring the sport" and will then shoot you with his anti tank cannon
+Cyborg enemies can now rip turret guns or vehicle mount weapons off and shoot you too
+Robots explode on death or catch fire if battery hit (already should be in baseline, but they should do way more damage now)
+In the rain, lithium dust spontaneously ignites 
+Superconductors in anything can now violently detonate and release emp if their temperature rises above their max temperature instead of just melting
