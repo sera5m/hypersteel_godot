@@ -170,3 +170,11 @@ The gag is that the sim exists as a corrupted save or a wrong-mode boot, not as 
 **Exact prompt from design discussion:** "Should we add this to the game" (meme: "Fuck rock salt and nails, home intruders get to go into the pocket dimension." with a shotgun shell packed with pink allergy pills) / "I mean it would be a funny secret item to add yeah."
 
 Secret shotgun ammo, an in-world chemical round rather than a real-world brand or recipe. Hit enemies go delirious: they hallucinate, shoot at shadows, swing at nothing, wander off, or turn on each other. Ultra hard idea (not decided): enemies can carry it too, so Ryko's HUD starts showing fake contacts.
+
+### The hat man (decided 2026-11-23)
+
+**Exact prompt from design discussion:** "Add the hat man to 27-confusing, but make the delerium shell as a gag where it has a 1/50 chance of the hat man appearing as a shadow of pure darkness right next to them,and he tips his hat and the enemy instantly gibs into pink instead of blood or oil or whatever"
+
+- Each enemy hit by a delirium shell has a 1/50 chance to trigger the hat man.
+- The hat man appears right next to the enemy as a shadow of pure darkness.
+- He tips his hat, and the enemy instantly gibs into pink instead of their normal blood, oil, or other gore.
