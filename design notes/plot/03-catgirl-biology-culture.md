@@ -1,6 +1,8 @@
 # Cat-people (engineered)
 
-Not anime neko. Not Nekopara pets. Origin: scientists wanted the morphology. Lead transplanted into a vat-grown younger body. Based on humans, traits integrated and **more functional** than a housecat. Outside mimics people. Inside incompatible (breeding, organs, timing).
+Not anime neko. Not Nekopara pets. Origin: scientists wanted the morphology during the Lost-75 genetic panic/crash-fix era. Lead transplanted into a vat-grown younger body. Based on humans, traits integrated and **more functional** than a housecat. Outside mimics people. Inside incompatible (breeding, organs, timing).
+
+**Yakub** did not create them. He later fixed a large number of genetic issues in the line (stability, organ timing, compatibility edges that the original panic-era work left broken) and became involved in their civil rights. Official line stays the panic programs; Yakub is the named figure who cleaned up the chassis and pushed the citizenship/rights side.
 
 ## Body
 - Average adult height **4'9"–5'4"** (scribble lock 2026-09-17). Old 5'2" midpoint still fine.
