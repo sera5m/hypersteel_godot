@@ -2,7 +2,7 @@
 
 Not anime neko. Not Nekopara pets. Origin: scientists wanted the morphology during the Lost-75 genetic panic/crash-fix era. Lead transplanted into a vat-grown younger body. Based on humans, traits integrated and **more functional** than a housecat. Outside mimics people. Inside incompatible (breeding, organs, timing).
 
-**Yakub** did not create them. He later fixed a large number of genetic issues in the line (stability, organ timing, compatibility edges that the original panic-era work left broken) and became involved in their civil rights. The fixes and the rights work were both exceptional—he is remembered because the results were that good, not because he was the original designer. Official line stays the panic programs; Yakub is the named figure who cleaned the chassis up to something durable and pushed the citizenship/rights side hard enough that the name stuck.
+The figure later remembered as **Yakub** did not create them. He is Middle Eastern; “Yakub” is not his actual name—some part of it sounded close enough that the clipped form stuck. He later fixed a large number of genetic issues in the line (stability, organ timing, compatibility edges that the original panic-era work left broken) and became involved in their civil rights. The fixes and the rights work were both exceptional—he is remembered because the results were that good, not because he was the original designer. Official line stays the panic programs; he is the named (by nickname) figure who cleaned the chassis up to something durable and pushed the citizenship/rights side hard enough that the sound-alike stuck.
 
 ## Body
 - Average adult height **4'9"–5'4"** (scribble lock 2026-09-17). Old 5'2" midpoint still fine.
