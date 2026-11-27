@@ -74,7 +74,7 @@ Examples already sketched: FFA, TDM, Attrition (TF2-style points). New modes are
 
 ## Server / world persistence
 
-Three tiers. All still listen-server; the difference is lifetime and who pays for the process.
+Three lifetime tiers, plus two orthogonal attributes.
 
 | Tier | Lifetime | Who runs it | What persists |
 |---|---|---|---|
@@ -82,16 +82,25 @@ Three tiers. All still listen-server; the difference is lifetime and who pays fo
 | **Session** | Host keeps the process open | A player or a small always-on box | Scoreboard, current map state, optional admin list. Dies with the process. |
 | **Permanent / dev** | Intended to stay up | Host’s machine or a cheap always-on box the host owns | Optional world state (placed objects, unlocked doors, custom loadouts). Still no central DB. |
 
-- Permanent and dev servers set the `permanent` / `dev_hosted` flags so the browser can filter or badge them.
-- Dev-hosted can be marked by the Tailscale account or a simple shared secret the master checks. Not a paid tier.
-- No central player database. A permanent server can optionally write a local JSON/SQLite file the host controls (unlocked doors, custom rules, ban list). Clients never talk to that file directly.
+**Orthogonal attributes** (can be set on any tier):
+
+- **Permadeath open world** — Minecraft-hardcore style. Limited or no respawns. Multiplayer mercs. Death is expensive; you may buy a limited number of reprints or lose the character. Does not conflict with permanent.
+- **Perma-world** — the world state is meant to stick around. Respawns can be infinite, limited per match, limited per character, or none. Permanent worlds can have infinite respawns. Permanent is just “the process is expected to stay up”; perma-world is “the map/state is meant to accumulate.”
+
+Permanent and dev servers set the `permanent` / `dev_hosted` flags so the browser can filter or badge them. Permadeath and perma-world are additional flags on the GameMode or server listing.
+
+Dev-hosted can be marked by the Tailscale account or a simple shared secret the master checks. Not a paid tier.
+
+No central player database. A permanent server can optionally write a local JSON/SQLite file the host controls (unlocked doors, custom rules, ban list, per-player stats for that server). Clients never talk to that file directly.
 
 ## Player data
 
 - **Loadout** is client-side. You bring your hip, pack, perks, and guns. The server validates the sheet against the GameMode’s allowed list (or ignores it if the mode is “bring whatever”).
-- **Identity** is Tailscale identity for the session. No accounts. Ban list is per-server and local to the host.
-- **Progression** is out of scope. No ranks, no unlocks stored on the master. If a permanent server wants unlocks it keeps them in its local file.
-- **Stats** (kills, deaths, score this match) live on the host for the duration of the match and are sent to clients for the scoreboard. They vanish when the match ends unless the host is permanent and chooses to log them.
+- **Identity** is Tailscale identity for the session. No global accounts. Ban list is per-server and local to the host.
+- **Stats are per-server.** Kills, deaths, score, time played, reprints used, etc. live on the host for that server. One instance of the stat blob per player per server. Not shared across servers.
+- **On leave:** the server writes a hidden encrypted file on the client’s hard drive containing that player’s stats for this server. Client cannot edit it in a useful way (encryption + integrity check). Next time they join the same server the client presents the file; the server can accept it, ignore it, or reconcile with its own copy.
+- **Progression** stays local to the server. No ranks or unlocks on the master. Permanent servers keep their own copy; the encrypted client file is just a portable receipt so the player doesn’t lose their numbers if the host’s process restarts.
+- Match-only servers still track stats for the duration of the match and can write the encrypted file on disconnect if the host wants. They just have nothing to reconcile against later.
 
 ## What is not in v1
 
