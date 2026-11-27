@@ -140,7 +140,16 @@ No central player database. A permanent server can optionally write a local JSON
 - **Browser UX while waiting:** spinner + last-known cache + direct-connect box always visible.
 - **Chat:** text only, host-relayed, in v1. Positional voice later.
 
-## Open problem
+## Networking transport (2026-11-27)
 
-**Tailscale for every player is a hard requirement** under the current plan. That is a large install/friction cost. Alternatives (hole-punching without Tailscale, optional relay, Steam networking, etc.) are not decided. Do not start the listen-server until this is resolved or explicitly accepted.
+**Preferred: Steam Networking.**  
+Godot has a Steamworks/GodotSteam path. Steam handles NAT traversal, hole-punching, and an optional relay. Players already have Steam if the game ships there. No extra install. Master still only does discovery (list + Steam lobby/ID handoff). Actual packets go Steam P2P.
+
+**Fallback options if Steam is not acceptable:**
+
+- **Tailscale bundled.** Ship the Tailscale client (or a minimal userspace WireGuard) as a prerequisite/installer step. Still an extra binary and account, but the player does not have to find it themselves.
+- **Plain UDP hole-punching + optional cheap relay.** Master coordinates the punch. Relay only when punch fails. Relay can be a single cheap VPS the host runs, or skipped entirely for “LAN / same-network only” in early tests.
+- **Accept Tailscale as a hard prereq.** Document it. Simplest code, highest friction.
+
+**Current lean:** Steam Networking first. Tailscale remains the documented alternative if Steam is off the table. Do not start listen-server packet code until the transport is locked.
 
