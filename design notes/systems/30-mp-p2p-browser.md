@@ -117,3 +117,11 @@ No central player database. A permanent server can optionally write a local JSON
 - Latency display is a simple ping to the Tailscale address before join.
 - Description panel is pure UI. No rich text, no links, no images.
 - Permanent servers are still P2P under the hood; the “master” is only the phone book.
+
+## Locked decisions (2026-11-26)
+
+- **Receipt reconcile:** both ways. Merge non-conflicting fields; host wins on conflicts. Client encrypted file is a backup/receipt, not the sole source.
+- **Browser filters (v1):** full CS-style. Gamemode, map, password, permanent, dev, latency range, empty/full toggle.
+- **Permanent / host process:** host’s own machine. Scripting extensions allowed so the host can restart the process, set gamemode, and other admin actions (scratch-style or simple script hooks). Still their hardware; master only sees the re-registration.
+- **Bots:** depends on GameMode. Host can flip a toggle to fill with bot-operated multiplayer mercs. Bots use the same AI as campaign soldiers. Not forced on every mode.
+
