@@ -125,3 +125,22 @@ No central player database. A permanent server can optionally write a local JSON
 - **Permanent / host process:** host’s own machine. Scripting extensions allowed so the host can restart the process, set gamemode, and other admin actions (scratch-style or simple script hooks). Still their hardware; master only sees the re-registration.
 - **Bots:** depends on GameMode. Host can flip a toggle to fill with bot-operated multiplayer mercs. Bots use the same AI as campaign soldiers. Not forced on every mode.
 
+
+## Locked decisions (2026-11-26, round 2)
+
+- **Master runtime:** C# / Godot headless. Same language as the game.
+- **Passwords:** none in v1. Open servers only.
+- **Latency:** both. Client pings the Tailscale address when possible; fall back to master heartbeat age.
+- **Host death:** script auto-restarts the process. Clients can rejoin the same map/GameMode. Stats come from the encrypted receipt if the host’s in-memory copy is gone.
+- **Host scripting (v1):** config file + restart flag only. No code hooks yet.
+- **Ban list:** host local file only. Dies with the machine.
+- **Map filter:** both. Known maps get pretty names from local defs; custom maps show the raw string the host sent.
+- **Dev badge:** none in v1. Permanent flag only.
+- **Max players:** host sets it; master enforces a hard cap (exact number still open).
+- **Browser UX while waiting:** spinner + last-known cache + direct-connect box always visible.
+- **Chat:** text only, host-relayed, in v1. Positional voice later.
+
+## Open problem
+
+**Tailscale for every player is a hard requirement** under the current plan. That is a large install/friction cost. Alternatives (hole-punching without Tailscale, optional relay, Steam networking, etc.) are not decided. Do not start the listen-server until this is resolved or explicitly accepted.
+
